@@ -11,7 +11,7 @@ weapons_data = {
 }
 
 item_data = {
-    'health_potion': {'Healing': generate_healing(), 'price': 5}
+    'health_potion': {'name': 'health_potion','Healing': generate_healing(), 'price': 5}
 }
 
 bar_drinks = {
@@ -20,14 +20,14 @@ bar_drinks = {
 }
 
 player_stats = {
-    'strength': 0,
-    'constitution': 0
+    'strength': 0.0,
+    'constitution': 0.0
 }
 
 name = None
 health = 20
 dev_mode_enabled = True
-inventory = ["health_potion ", "chain_mail"]
+inventory = ["health_potion", "chain_mail"]
 weapon = 'iron_shortsword'
 weapon_durability = 15
 coin  = 100
@@ -69,14 +69,14 @@ class battle:
             time.sleep(1)
 
             X = input(f"""
-            Your health: {health}
+        Your health: {health}
 
-            Inventory: {inventory}
-            Weapon: {weapon}
+        Inventory: {inventory}
+        Weapon: {weapon}
 
-            You have {healthp_amount} health potions. use one? (Type hp)
+        You have {healthp_amount} health potions. use one? (Type hp)
 
-            Type W to continue the battle\n""")
+        Hit ENTER to continue the battle\n""")
 
             if X.lower() == 'hp':
                 health += item_data['health_potion']['Healing']
@@ -92,12 +92,12 @@ class battle:
             time.sleep(.5)
             hitq = random.randint(1, 10)
             if hitq > 5:
-                self.attacker_health -= weapons_data[weapon]['Damage']
-                done_durability = done_durability - 2
+                self.attackers_health -= weapons_data[weapon]['Damage']
+                done_durability += 2
                 print(f"The {self.attackers_name} missed! Giving you the opportunity to attack!")
                 time.sleep(1)
                 if dev_mode_enabled:
-                    print(f"The {self.attackers_name} has {self.attacker_health} left!")
+                    print(f"The {self.attackers_name} has {self.attackers_health} left!")
                     print(f"Done durability: {done_durability}\nweapon durability: {weapon_durability}")
             else:
                 health -= self.attackers_damage
@@ -114,7 +114,7 @@ class battle:
 def random_event_picker():
     global healthp_amount, inventory, weapon, health, weapon_durability
     wait()
-    while 1 == 1:
+    while True:
         healthcap()
         healthp_amount = inventory.count('health_potion')
         if type(weapon_durability) is float:
@@ -126,23 +126,26 @@ def random_event_picker():
         Health: {health}
         Health potions: {healthp_amount}
 
-        Equiped weapon: {weapon}
+        Equiped weapon: {weapon} (Durability: {weapon_durability})
+
+        You have)
         Inventory: {inventory}
         Coin amount: {coin}
 
         Actions:
-        1. Continue walking
-        2. Take health potion\n
+        Hit ENTER to continue walking
+        
+        1. Take health potion\n
 ''')
         if X == '1':
-            events = [tavern, kidnappers, travling_merchant]
-            random.choice(events)()
-        elif X == '2':
             health += item_data['health_potion']['Healing']
             inventory.remove('health_potion')
             healthcap()
             print('Consuming one health potion...')
             time.sleep(1)
+        else:
+            events = [travling_merchant]
+            random.choice(events)()
 
 def start():
     global name
@@ -250,9 +253,9 @@ Bartender's menu
 HS. HOUSE SPECIAL: Dragon Blood
 
 This ale is dark and thick and a little bitter with a smoky after taste, an acquired taste for many. The bartender warns you that this drink will certainly leave you wasted.
-                       
+
 L for leave\n''')
-    
+
         if menu_entry == '1':
             print(f'{bt}: {choice_of_buydrink}')
             time.sleep(1)
@@ -269,7 +272,7 @@ L for leave\n''')
                 time.sleep(1)
                 print(f'{bt}: As long as you use your own glass am fine with it.')
                 time.sleep(1)
-        
+
         elif menu_entry == '2':
             print(f'{bt}: {choice_of_buydrink}')
             time.sleep(1)
@@ -319,13 +322,13 @@ L for leave\n''')
                 else:
                     player_stats['constitution'] += .02
                     print(f"{bt}: Well, I would not have guessed you'd be able to stand after that,")
-        
+
         elif menu_entry.lower() == 'l':
             print(f'\033[3m{name}\033[0m: Thank you, but I think I am OK.')
-            time.sleep("1")
+            time.sleep(1)
             print(f'{bt}: {choice_of_leave}')
             tavern()
-            
+
 def travling_merchant():
     print('A merchant, with his backpack filled to the brim with items, comes toward you.')
     time.sleep(1)
@@ -341,60 +344,104 @@ def travling_merchant():
 
 def merchant_shop():
     global coin
+    traded = False
     trader_prompts = ['What can I do you for?', 'What will it be today?', 'Anything catching your eye?']
+    
     weapons_list = list(weapons_data.values())
     item1 = random.choice(weapons_list)
     item2 = random.choice(weapons_list)
     item3 = random.choice(weapons_list)
-    while 1 > 0:
+    
+    while True:
         trader_prompt = random.choice(trader_prompts)
+        print(f'''
+         Merchant's shop
+
+        1. {item1['name']}
+        2. {item2['name']}
+        3. {item3['name']}
+
+        Coin: {coin}
+
+        Inventory: {inventory}\n
+        ''')
         print('1. Buy items')
         print('2. Sell items')
         print('3. Leave')
         t = input('')
         if t == '1':
-            traded = True
             print(trader_prompt)
-            print(f'''
-        Merchant's shop
+            time.sleep(1)
+            bought_item = input('What would you like to buy? (1, 2, or 3?)\n')
+
+            if bought_item == '1' and coin >= item1['price']:
+                traded = True
+                coin -= item1['price']
+                inventory.append(item1['name'])
+                print(f'You bought a {item1["name"]}!')
+                time.sleep(1)
+                print(f'You now have {coin} coins left.')
+
+            elif bought_item == '2' and coin >= item2['price']:
+                traded = True
+                coin -= item2['price']
+                inventory.append(item2['name'])
+                print(f'You bought a {item2["name"]}!')
+                time.sleep(1)
+                print(f'You now have {coin} coins left.')
+
+            elif bought_item == '3' and coin >= item3['price']:
+                traded = True
+                coin -= item3['price']
+                inventory.append(item2['name'])
+                print(f'You bought a {item3["name"]}!')
+                time.sleep(1)
+                print(f'You now have {coin} coins left.')
+
+            else:
+                print('You do not have enough money to buy that item.')
+                
             
-        1. {item1['name']}
-
-        2. {item2['name']}
-
-        3. {item3['name']}
-
-
-        Coin: {coin}
-
-        Inventory: {inventory}\n
-''')
-        elif t =='2':
-            traded = True
+        elif t =='2': 
             print(trader_prompt)
             sell = input(f'''
-Selling
+        Selling
 
-Inventory: {inventory}
+        Inventory: {inventory}
 
-Type the name of the item you'd like to sell\n
+        Type the name of the item you'd like to sell\n
 ''')
+            sell = sell.lower()
             if sell in inventory:
-                item = weapons_data[sell]
-                original_price = item['price']
-                durability_percentage = (item['Durability'] / weapon_durability) * 100
-                selling_price = original_price * (durability_percentage / 100)
-                coin += selling_price
-                inventory.remove(sell)
-                print(f"You sold {sell} for {selling_price} coins.")
+                traded = True
+                if sell in weapons_data:
+                    item = weapons_data[sell]
+                    original_price = item['price']
+                    durability_percentage = (item['Durability'] / weapon_durability) * 100
+                    selling_price = original_price * (durability_percentage / 100)
+                    coin += selling_price
+                    inventory.remove(sell)
+                    print(f"You sold {sell} for {selling_price} coins.")
+                elif sell in item_data:
+                    item = item_data[sell]
+                    original_price = item['price']
+                    selling_price = original_price / 2
+                    coin += selling_price
+                    inventory.remove(sell)
+                    print(f"You sold {sell} for {selling_price} coins.")
+                    
+                else:
+                    print("ERROR: Item doesn't exist in either weapons_data or item_data.")
             else:
                 print("You don't have that item.")
-        
+
         elif t == '3' or t.lower() == 'l':
             if traded:
                 print('The merchant waves goodbye as you leave.')
+                random_event_picker()
             else:
                 print('You leave as the merchant sighs.')
+                random_event_picker()
 
 def kidnappers():
     print('As you walk along the weaving path in the forest,')

@@ -123,19 +123,19 @@ def random_event_picker():
         X = input(f'''
 
 
-health: {health}
-health potions: {healthp_amount}
+        Health: {health}
+        Health potions: {healthp_amount}
 
-equiped weapon: {weapon}
-inventory: {inventory}
-coin amount: {coin}
+        Equiped weapon: {weapon}
+        Inventory: {inventory}
+        Coin amount: {coin}
 
-Actions:
-1. Continue walking
-2. Take health potion\n
+        Actions:
+        1. Continue walking
+        2. Take health potion\n
 ''')
         if X == '1':
-            events = [tavern, kidnappers]
+            events = [tavern, kidnappers, travling_merchant]
             random.choice(events)()
         elif X == '2':
             health += item_data['health_potion']['Healing']
@@ -326,7 +326,6 @@ L for leave\n''')
             print(f'{bt}: {choice_of_leave}')
             tavern()
             
-
 def travling_merchant():
     print('A merchant, with his backpack filled to the brim with items, comes toward you.')
     time.sleep(1)
@@ -357,18 +356,18 @@ def merchant_shop():
             traded = True
             print(trader_prompt)
             print(f'''
-Merchant's shop
+        Merchant's shop
             
-1. {item1['name']}
+        1. {item1['name']}
 
-2. {item2['name']}
+        2. {item2['name']}
 
-3. {item3['name']}
+        3. {item3['name']}
 
 
-Coin: {coin}
+        Coin: {coin}
 
-Inventory: {inventory}\n
+        Inventory: {inventory}\n
 ''')
         elif t =='2':
             traded = True

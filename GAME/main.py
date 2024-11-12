@@ -48,6 +48,112 @@ def healthcap():
         health = 20
 
 
+class shop():
+    def __init__(self, name: str):
+        weapons_list = list(weapons_data.values())
+        items_list = list(item_data.values())
+        self.item1 = random.choice(weapons_list)
+        self.item2 = random.choice(items_list)
+        self.item3 = random.choice(items_list)
+        self.name: str = name
+
+    def shop_menu(self):
+        global coin, inventory
+        traded = False
+        trader_prompts = ['What can I do you for?', 'What will it be today?', 'Anything catching your eye?']
+        
+        while True:
+            trader_prompt = random.choice(trader_prompts)
+            print(f'''
+             Merchant's shop
+
+            1. {self.item1['name']}
+            2. {self.item2['name']}
+            3. {self.item3['name']}
+
+            Coin: {coin}
+
+            Inventory: {inventory}\n
+            ''')
+            print('1. Buy items')
+            print('2. Sell items')
+            print('\nPress ENTER to leave')
+            t = input('')
+            if t == '1':
+                print(trader_prompt)
+                time.sleep(1)
+                bought_item = input('What would you like to buy? (1, 2, or 3?)\n')
+
+                if bought_item == '1' and coin >= self.item1['price']:
+                    traded = True
+                    coin -= self.item1['price']
+                    inventory.append(self.item1['name'])
+                    print(f'You bought a {self.item1["name"]}!')
+                    time.sleep(1)
+                    print(f'You now have {coin} coins left.')
+
+                elif bought_item == '2' and coin >= self.item2['price']:
+                    traded = True
+                    coin -= self.item2['price']
+                    inventory.append(self.item2['name'])
+                    print(f'You bought a {self.item2["name"]}!')
+                    time.sleep(1)
+                    print(f'You now have {coin} coins left.')
+
+                elif bought_item == '3' and coin >= self.item3['price']:
+                    traded = True
+                    coin -= self.item3['price']
+                    inventory.append(self.item2['name'])
+                    print(f'You bought a {self.item3["name"]}!')
+                    time.sleep(1)
+                    print(f'You now have {coin} coins left.')
+
+                else:
+                    print('You do not have enough money to buy that item.')
+
+
+            elif t =='2': 
+                print(trader_prompt)
+                sell = input(f'''
+            Selling
+
+            Inventory: {inventory}
+
+            Type the name of the item you'd like to sell\n
+        ''')
+                sell = sell.strip().lower()
+                if sell in inventory:
+                    traded = True
+                    if sell in weapons_data:
+                        item = weapons_data[sell]
+                        original_price = item['price']
+                        durability_percentage = (item['Durability'] / weapon_durability) * 100
+                        selling_price = original_price * (durability_percentage / 100)
+                        coin += selling_price
+                        inventory.remove(sell)
+                        print(f"You sold {sell} for {selling_price} coins.")
+                    elif sell in item_data:
+                        item = item_data[sell]
+                        original_price = item['price']
+                        selling_price = original_price / 2
+                        coin += selling_price
+                        inventory.remove(sell)
+                        print(f"You sold {sell} for {selling_price} coins.")
+
+                    else:
+                        print("ERROR: Item doesn't exist in either weapons_data or item_data.")
+                else:
+                    print("You don't have that item.")
+
+            else:
+                if traded:
+                    print('The merchant waves goodbye as you leave.')
+                    random_event_picker()
+                else:
+                    print('You leave as the merchant sighs.')
+                    random_event_picker()
+
+
 class battle:
     def __init__(self, attackers_name: str, attackers_health: int, attackers_damage: int):
         self.attackers_name: str = attackers_name
@@ -74,19 +180,31 @@ class battle:
         Inventory: {inventory}
         Weapon: {weapon}
 
-        You have {healthp_amount} health potions. use one? (Type hp)
+        Actions:
+        
+        Hit ENTER to continue walking
+        
+        1. Take health potion (You have {healthp_amount})
+        2. Switch equiped weapon\n
+""")
 
-        Hit ENTER to continue the battle\n""")
-
-            if X.lower() == 'hp':
+            if X.lower() == '1':
                 health += item_data['health_potion']['Healing']
                 inventory.remove('health_potion')
                 healthcap()
                 print("Consuming one health potion...")
                 time.sleep(1)
                 print(f"You now have {health} health and {healthp_amount} health potions.")
+            elif X.lower() == '2':
+                switched_weapon = input('What weapon would you like to switch to?\n')
+                switched_weapon = switched_weapon.strip().lower()
+                if switched_weapon in inventory:
+                    inventory.append(weapon)
+                    weapon = switched_weapon
+                else:
+                    print("You don't have that weapon.")
             else:
-                print("\n")
+                pass
 
             print(f"The {self.attackers_name} charges towards you,")
             time.sleep(.5)
@@ -128,14 +246,15 @@ def random_event_picker():
 
         Equiped weapon: {weapon} (Durability: {weapon_durability})
 
-        You have)
         Inventory: {inventory}
         Coin amount: {coin}
 
         Actions:
+        
         Hit ENTER to continue walking
         
-        1. Take health potion\n
+        1. Take health potion
+        2. Switch equiped weapon\n
 ''')
         if X == '1':
             health += item_data['health_potion']['Healing']
@@ -143,8 +262,15 @@ def random_event_picker():
             healthcap()
             print('Consuming one health potion...')
             time.sleep(1)
+        elif X == '2':
+            switched_weapon = input('What weapon would you like to switch to?\n')
+            if switched_weapon in inventory:
+                inventory.append(weapon)
+                weapon = switched_weapon
+            else:
+                print("You don't have that weapon.")
         else:
-            events = [travling_merchant]
+            events = [travling_merchant, tavern, kidnappers]
             random.choice(events)()
 
 def start():
@@ -338,122 +464,20 @@ def travling_merchant():
         time.sleep(.25)
         print('"Wonderful! See what you like."')
         time.sleep(1)
-        merchant_shop()
+        merchant_shop = shop("Merchant's Shop")
+        merchant_shop.shop_menu()
     else:
         print('The merchant wonders away in solom.')
 
-def merchant_shop():
-    global coin
-    traded = False
-    trader_prompts = ['What can I do you for?', 'What will it be today?', 'Anything catching your eye?']
-    
-    weapons_list = list(weapons_data.values())
-    item1 = random.choice(weapons_list)
-    item2 = random.choice(weapons_list)
-    item3 = random.choice(weapons_list)
-    
-    while True:
-        trader_prompt = random.choice(trader_prompts)
-        print(f'''
-         Merchant's shop
-
-        1. {item1['name']}
-        2. {item2['name']}
-        3. {item3['name']}
-
-        Coin: {coin}
-
-        Inventory: {inventory}\n
-        ''')
-        print('1. Buy items')
-        print('2. Sell items')
-        print('3. Leave')
-        t = input('')
-        if t == '1':
-            print(trader_prompt)
-            time.sleep(1)
-            bought_item = input('What would you like to buy? (1, 2, or 3?)\n')
-
-            if bought_item == '1' and coin >= item1['price']:
-                traded = True
-                coin -= item1['price']
-                inventory.append(item1['name'])
-                print(f'You bought a {item1["name"]}!')
-                time.sleep(1)
-                print(f'You now have {coin} coins left.')
-
-            elif bought_item == '2' and coin >= item2['price']:
-                traded = True
-                coin -= item2['price']
-                inventory.append(item2['name'])
-                print(f'You bought a {item2["name"]}!')
-                time.sleep(1)
-                print(f'You now have {coin} coins left.')
-
-            elif bought_item == '3' and coin >= item3['price']:
-                traded = True
-                coin -= item3['price']
-                inventory.append(item2['name'])
-                print(f'You bought a {item3["name"]}!')
-                time.sleep(1)
-                print(f'You now have {coin} coins left.')
-
-            else:
-                print('You do not have enough money to buy that item.')
-                
-            
-        elif t =='2': 
-            print(trader_prompt)
-            sell = input(f'''
-        Selling
-
-        Inventory: {inventory}
-
-        Type the name of the item you'd like to sell\n
-''')
-            sell = sell.lower()
-            if sell in inventory:
-                traded = True
-                if sell in weapons_data:
-                    item = weapons_data[sell]
-                    original_price = item['price']
-                    durability_percentage = (item['Durability'] / weapon_durability) * 100
-                    selling_price = original_price * (durability_percentage / 100)
-                    coin += selling_price
-                    inventory.remove(sell)
-                    print(f"You sold {sell} for {selling_price} coins.")
-                elif sell in item_data:
-                    item = item_data[sell]
-                    original_price = item['price']
-                    selling_price = original_price / 2
-                    coin += selling_price
-                    inventory.remove(sell)
-                    print(f"You sold {sell} for {selling_price} coins.")
-                    
-                else:
-                    print("ERROR: Item doesn't exist in either weapons_data or item_data.")
-            else:
-                print("You don't have that item.")
-
-        elif t == '3' or t.lower() == 'l':
-            if traded:
-                print('The merchant waves goodbye as you leave.')
-                random_event_picker()
-            else:
-                print('You leave as the merchant sighs.')
-                random_event_picker()
-
 def kidnappers():
+    thug_fight = battle('Thugs', 10, 2)
     print('As you walk along the weaving path in the forest,')
     time.sleep(1)
     print('A group of thugs jumps from the bushes.')
     time.sleep(1)
     print("THUG: Get em boys!")
-    thug_fight()
-
-def thug_fight():
-    thug_fight = battle('Thugs', 10, 2)
-
     thug_fight.fight()
 
+def town():
+    pass
 start()

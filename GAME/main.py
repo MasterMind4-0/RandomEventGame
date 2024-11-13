@@ -15,7 +15,8 @@ item_data = {
 }
 
 bar_drinks = {
-    'rum': {'name': 'Rum', 'drunk_effective': .7, 'price': 3},
+    'rum': {'name': 'Rum', 'drunk_effective': .70, 'price': 3},
+    'wine': {'name': 'Wine', 'drunk_effective': .50, 'price': 4},
     'dragons_blood': {'name': "Dragon's Blood", 'drunk_effective': .99, 'price': 6}
 }
 
@@ -61,7 +62,7 @@ class shop():
         global coin, inventory
         traded = False
         trader_prompts = ['What can I do you for?', 'What will it be today?', 'Anything catching your eye?']
-        
+
         while True:
             trader_prompt = random.choice(trader_prompts)
             print(f'''
@@ -181,9 +182,9 @@ class battle:
         Weapon: {weapon}
 
         Actions:
-        
+
         Hit ENTER to continue walking
-        
+
         1. Take health potion (You have {healthp_amount})
         2. Switch equiped weapon\n
 """)
@@ -250,9 +251,9 @@ def random_event_picker():
         Coin amount: {coin}
 
         Actions:
-        
+
         Hit ENTER to continue walking
-        
+
         1. Take health potion
         2. Switch equiped weapon\n
 ''')
@@ -358,6 +359,7 @@ def bartalk():
             print('Invalid')
 
 def bartender():
+    global coin
     btgreetings = ['How are you doing today?', 'What can I get you?', "We don't have virgin here for the record.", "I feel sorry for people who don't drink. When they wake up in the morning, that's as good as they're going to feel all day."]
     btbuydrink = ['That there is a good drink.', 'You vomit outside, not on me, got it?', 'Your order.']
     btleave = ['Pleasure doing business.', 'Hope to see you again.', 'Until you order again.']
@@ -373,48 +375,97 @@ def bartender():
         menu_entry = input('''
 Bartender's menu
 
-1. Rum
-2. Wine
+1. Rum - 3 coins
+2. Wine - 4 coins
 
-HS. HOUSE SPECIAL: Dragon Blood
+HS. HOUSE SPECIAL: Dragon Blood - 6 coins
 
 This ale is dark and thick and a little bitter with a smoky after taste, an acquired taste for many. The bartender warns you that this drink will certainly leave you wasted.
 
-L for leave\n''')
+Press ENTER for leave\n''')
 
         if menu_entry == '1':
-            print(f'{bt}: {choice_of_buydrink}')
-            time.sleep(1)
-
-            print('You take hold of your drink,')
-            time.sleep(1)
-            t = input('\033[3m"Should I drink it, or should I take it with me?"\033[0m (Take or drink?)')
-            if t == 'drink':
-                print('You lift you chin and gulp the liquor to the last drop.')
-                time.sleep(1)
+            if coin < 3:
+                print(f"{bt}: Hey there, this ain't a charity, you got to have enough money for this liquor here.")
             else:
-                inventory.append('Rum')
-                print(f"\033[3m{name}\033[0m: I'll take this to go.")
+                drunk_chance = bar_drinks['rum']['drunk_effective'] - (player_stats['constitution'] / 10)
+                random_value = random.random()
+                if random_value < drunk_chance:
+                    wasted = True
+                    if dev_mode_enabled:
+                        print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
+                else:
+                    wasted = False
+                    if dev_mode_enabled:
+                        print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
+
+            
+                print(f'{bt}: {choice_of_buydrink}')
                 time.sleep(1)
-                print(f'{bt}: As long as you use your own glass am fine with it.')
+
+                print('You take hold of your drink,')
                 time.sleep(1)
+                t = input('\033[3m"Should I drink it, or should I take it with me?"\033[0m (Take or drink?)')
+                if t == 'drink':
+                    print('You lift you chin and gulp the liquor to the last drop.')
+                    time.sleep(1)
+                    if wasted:
+                        coin -= 6
+                        if coin < 0:
+                            coin = 0
+                        print('After your first, you feel a tad tipsy.')
+                        time.sleep(1)
+                        print('After your third you are passed out.')
+                        back_alley()
+                    else:
+                        pass
+                else:
+                    inventory.append('Rum')
+                    print(f"\033[3m{name}\033[0m: I'll take this to go.")
+                    time.sleep(1)
+                    print(f'{bt}: As long as you use your own glass am fine with it.')
+                    time.sleep(1)
 
         elif menu_entry == '2':
-            print(f'{bt}: {choice_of_buydrink}')
-            time.sleep(1)
-
-            print('You take hold of your drink,')
-            time.sleep(1)
-            t = input('\033[3m"Should I drink it, or should I take it with me?"\033[0m (Take or drink?)')
-            if t == 'drink':
-                print('You sip your wine gently, soaking in the flavor and aroma.')
-                time.sleep(1)
+            if coin < 4:
+                print(f"{bt}: Hey there, this ain't a charity, you got to have enough money for this liquor here.")
             else:
-                inventory.append('Wine')
-                print(f"\033[3m{name}\033[0m: I'll take this to go.")
+                drunk_chance = bar_drinks['wine']['drunk_effective'] - (player_stats['constitution'] / 10)
+                random_value = random.random()
+                if random_value < drunk_chance:
+                    wasted = True
+                    if dev_mode_enabled:
+                        print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
+                else:
+                    wasted = False
+                    if dev_mode_enabled:
+                        print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
+
+            
+                print(f'{bt}: {choice_of_buydrink}')
                 time.sleep(1)
-                print(f'{bt}: As long as you use your own glass am fine with it.')
+
+                print('You take hold of your drink,')
                 time.sleep(1)
+                t = input('\033[3m"Should I drink it, or should I take it with me?"\033[0m (Take or drink?)')
+                if t == 'drink':
+                    print('You sip your wine gently, soaking in the flavor and aroma.')
+                    time.sleep(1)
+                    if wasted:
+                        print('As you take your slow sips, you feel a little dizzy.')
+                        time.sleep(1)
+                        print('You feel your body loosen and as you pass out, you hear,')
+                        time.sleep(.5)
+                        print(f'{bt}: Knocked cold from bloody wine?!')
+                        back_alley()
+                    else:
+                        pass
+                else:
+                    inventory.append('Wine')
+                    print(f"\033[3m{name}\033[0m: I'll take this to go.")
+                    time.sleep(1)
+                    print(f'{bt}: As long as you use your own glass am fine with it.')
+                    time.sleep(1)
 
         elif menu_entry.lower() == 'hs':
             if coin < 6:
@@ -443,17 +494,70 @@ L for leave\n''')
                 time.sleep(1)
                 if wasted:
                     print('But, alas, it still hits your stomach with such force, you can barely finish.')
-                    time.sleep(1)
-                    print('Before you know it, your in the back alley of the tavern.')
+                    back_alley()
                 else:
                     player_stats['constitution'] += .02
-                    print(f"{bt}: Well, I would not have guessed you'd be able to stand after that,")
+                    inventory.append('health_potion')
+                    print(f"{bt}: Well, I would not have guessed you'd be able to stand after that.")
+                    time.sleep(1)
+                    print(f"{bt}: Hey, in honor of you survival, here, take this, I don't have much use for this." )
+                    time.sleep(.5)
+                    print('\033[3m"He gives you a health potion..."\033[0m')
 
-        elif menu_entry.lower() == 'l':
+        else:
             print(f'\033[3m{name}\033[0m: Thank you, but I think I am OK.')
             time.sleep(1)
             print(f'{bt}: {choice_of_leave}')
             tavern()
+
+def back_alley():
+    global coin
+    thug = '\033[3mThug\033[0m'
+    thug_leader = '\033[3mThug Leader\033[0m'
+    wait()
+    print('You awaken in a dark alley way.')
+    time.sleep(1)
+    print('Your head screams and you mouth thirsts.')
+    time.sleep(1)
+    print('You notice it is night,')
+    time.sleep(1)
+    print('As you were looking around, you happened to notice a shadow walking toward you...')
+    time.sleep(1)
+    print(f"{thug_leader}: Hey, you. The sorry looking filth.")
+    time.sleep(1)
+    print('You notice two other figures behind the masked fellow.')
+    time.sleep(1)
+    print(f"\033[0m{name}\033[0m: Just get away from me.")
+    time.sleep(1)
+    print(f'{thug_leader}: Well! Look at the little rascal!')
+    time.sleep(1)
+    print(f'{thug}: Fiesty little rascal, he is.')
+    time.sleep(.5)
+    print('\033[3m"Said on the the figures in the back."\033[0m')
+    time.sleep(1)
+    print(f"{thug_leader}: Ok, let's cut to the chase, give us everything you got.")
+    time.sleep(1)
+    print(f"{thug}: And we mean everything!")
+    time.sleep(1)
+    response = input('Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n')
+
+    if response == '1':
+        thug_fight = battle('Thugs', 20, 3)
+        print(f'\033[3m{name}\033[0m: As, I said, back the HELL AWAY!')
+        time.sleep(1)
+        thug_fight.fight()
+    elif response == '2':
+        print(f"\033[3m{name}\033[0m: Fine, fine, yes. I'll give my stuff.")
+        time.sleep(1)
+        stuff_given = input(f'''
+        Inventory: {inventory}
+
+        What do you give?\n
+        ''')
+        if stuff_given in inventory and stuff_given in weapons_data or stuff_given in item_data:
+            inventory.remove(stuff_given)
+            print(f'\033[3m"You give the {stuff_given} to the men, they look you up and down."\033[0m') 
+    
 
 def travling_merchant():
     print('A merchant, with his backpack filled to the brim with items, comes toward you.')

@@ -343,6 +343,7 @@ def start():
     print('Well, that is all, let us begin!')
     random_event_picker()
 
+
 def tavern():
     global bartalk_name
     namelist = ['Sophia', 'Timmy', 'Alex', 'Steve', 'Boldimore']
@@ -560,6 +561,7 @@ L for leave\n''')
             print(f'{bt}: {choice_of_leave}')
             tavern()
 
+
 def travling_merchant():
     print(
         'A merchant, with his backpack filled to the brim with items, comes toward you.'
@@ -596,9 +598,7 @@ def back_alley():
     time.sleep(1)
     print('You notice it is night,')
     time.sleep(1)
-    print(
-        'As you were looking around, you happened to notice a shadow walking toward you...'
-    )
+    print('As you were looking around, you happened to notice a shadow walking toward you...')
     time.sleep(1)
     print(f"{thug_leader}: Hey, you. The sorry looking filth.")
     time.sleep(1)
@@ -612,15 +612,11 @@ def back_alley():
     time.sleep(.5)
     print('\033[3m"Said on the the figures in the back."\033[0m')
     time.sleep(1)
-    print(
-        f"{thug_leader}: Ok, let's cut to the chase, give us everything you got."
-    )
+    print(f"{thug_leader}: Ok, let's cut to the chase, give us everything you got.")
     time.sleep(1)
     print(f"{thug}: And we mean everything!")
     time.sleep(1)
-    response = input(
-        'Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n'
-    )
+    response = input('Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n')
 
     if response == '1':
         thug_fight = battle('Thugs', 20, 3)
@@ -630,27 +626,47 @@ def back_alley():
     elif response == '2':
         print(f"\033[3m{name}\033[0m: Fine, fine, yes. I'll give my stuff.")
         time.sleep(1)
-        stuff_given = input(f'''
+        while True:
+            stuff_given = input(f'''
         Inventory: {inventory}
 
         What do you give?\n
         ''')
-        if stuff_given in inventory and stuff_given in weapons_data or stuff_given in item_data:
-            inventory.remove(stuff_given)
-            print(
-                f'\033[3m"You give the {stuff_given} to the men, they look you up and down."\033[0m'
-            )
+            if stuff_given in inventory and stuff_given in items:
+                inventory.remove(stuff_given)
+                print(f'\033[3m"You give the {stuff_given} to the men, they look you up and down."\033[0m')
+                time.sleep(1)
+                print(f"{thug_leader}: Well then, that wasn't too hard now, was it?")
+                time.sleep(1)
+                print('\033[3m"The thugs disappear into the darkness."\033[0m')
+                time.sleep(1)
+                print(f'{thug_leader}: Not that hard at all...')
+                random_event_picker()
+            else:
+                print('ERROR: Invalid.')
+    elif response == '3':
+        inventory.remove(inventory)
+        print(f"\033[3m{name}\033[0m: OK, OK! Here.")
+        time.sleep(1)
+        print('\033[3m"You hand the thugs all your things, they mouths foam with envy. A good haul for them."\033[0m')
+        time.sleep(1)
+        print(f"{thug_leader}: I need you'd come to your senses friend!")
+        time.sleep(.5)
+        print(f"{thug_leader}: Yeah, these knuckle-heads didn't believe me, but I knew it." )
+        time.sleep(1)
+        print(f"{thug_leader}: Well, friend, until we meet again!")
+        time.sleep(1)
+        print('\033[3m"The thugs disappear into the darkness."\033[0m')
+        time.sleep(1)
+        print(f'{thug_leader}: Until we meet again...')
+        random_event_picker()
 
 def town():
 
-    store1 = shop(
-        "Sasha's Weapons",
-        [items['weapons']['iron_shortsword'], items['weapons']['crossbow']])
+    store1 = shop("Sasha's Weapons", [items['weapons']['iron_shortsword'], items['weapons']['crossbow']])
     store2 = shop("Tintoe's Couldron", [items['items']['health_potion']])
 
-    print(
-        '\033[3m"You come across a village, should you enter is the question at hand..."\033[0m'
-    )
+    print('\033[3m"You come across a village, should you enter is the question at hand..."\033[0m')
     time.sleep(1)
     x = input('Do you wish to enter? (Y/N)\n')
     if x.lower() == 'y':

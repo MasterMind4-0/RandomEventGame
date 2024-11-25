@@ -12,13 +12,11 @@ items = {
         'iron_shortsword': {
             'name': 'iron_shortsword',
             'Damage': 2,
-            'Durability': 15,
             'price': 15
         },
         'crossbow': {
             'name': 'crossbow',
             'Damage': 3,
-            'Durability': 10,
             'price': 15
         },
     },
@@ -50,7 +48,6 @@ health = 20
 dev_mode_enabled = True
 inventory = ["health_potion", "chain_mail"]
 weapon = 'iron_shortsword'
-weapon_durability = 15
 coin = 100
 
 bartalk_name = None
@@ -171,16 +168,7 @@ class shop():
                         if sell in item_category:
                             item = item_category[sell]
                             original_price = item['price']
-
-                            if item_type == 'weapons':
-                                durability_percentage = (
-                                    item['Durability'] /
-                                    weapon_durability) * 100
-                                selling_price = original_price * (
-                                    durability_percentage / 100)
-                            else:
-
-                                selling_price = original_price / 2
+                            selling_price = original_price / 2
 
                             coin += selling_price
                             inventory.remove(sell)
@@ -210,12 +198,9 @@ class battle:
         self.attackers_damage: int = attackers_damage
 
     def fight(self):
-        global health, weapon_durability, inventory, weapon, healthp_amount
-        done_durability = 0
+        global health, inventory, weapon, healthp_amount
 
         while health >= 1:
-            weapon_durability -= done_durability
-            done_durability = 0
 
             if self.attackers_health <= 0:
                 print("You won the fight!")
@@ -261,18 +246,10 @@ class battle:
                 hitq = random.randint(1, 10)
                 if hitq > 5:
                     self.attackers_health -= items['weapons'][weapon]['Damage']
-                    done_durability += 2
-                    print(
-                        f"The {self.attackers_name} missed! Giving you the opportunity to attack!"
-                    )
+                    print(f"The {self.attackers_name} missed! Giving you the opportunity to attack!")
                     time.sleep(1)
                     if dev_mode_enabled:
-                        print(
-                            f"The {self.attackers_name} has {self.attackers_health} left!"
-                        )
-                        print(
-                            f"Done durability: {done_durability}\nweapon durability: {weapon_durability}"
-                        )
+                        print(f"The {self.attackers_name} has {self.attackers_health} left!")
                 else:
                     health -= self.attackers_damage
                     print(f"The {self.attackers_name} hit you!")
@@ -286,20 +263,18 @@ class battle:
 
 
 def random_event_picker():
-    global healthp_amount, inventory, weapon, health, weapon_durability
+    global healthp_amount, inventory, weapon, health
     wait()
     while True:
         healthcap()
         healthp_amount = inventory.count('health_potion')
-        if type(weapon_durability) is float:
-            weapon_durability.round()
         X = input(f'''
 
 
         Health: {health}
         Health potions: {healthp_amount}
 
-        Equiped weapon: {weapon} (Durability: {weapon_durability})
+        Equiped weapon: {weapon}
 
         Inventory: {inventory}
         Coin amount: {coin}

@@ -228,9 +228,7 @@ class battle:
                 healthcap()
                 print("Consuming one health potion...")
                 time.sleep(1)
-                print(
-                    f"You now have {health} health and {healthp_amount} health potions."
-                )
+                print(f"You now have {health} health and {healthp_amount} health potions.")
             elif X.lower() == '2':
                 switched_weapon = input(
                     'What weapon would you like to switch to?\n')
@@ -318,10 +316,8 @@ def start():
     print('Well, that is all, let us begin!')
     random_event_picker()
 
-
 def tavern():
     global bartalk_name
-    namelist = ['Sophia', 'Timmy', 'Alex', 'Steve', 'Boldimore']
     print('You entered tavern.')
     time.sleep(2)
     print('As you enter, the whiff of alcohol and sweat fills your nose,')
@@ -337,7 +333,6 @@ def tavern():
 
     elif Choice == "2":
         un = '\033[3mUnknown\033[0m'
-        bartalk_name = random.choice(namelist)
         print(f"{name}: Hey! You there!")
         time.sleep(2)
         print(f'{un} looks at you.')
@@ -352,31 +347,25 @@ def tavern():
         random_event_picker()
 
 def bartalk():
+    namelist = ['Sophia', 'Timmy', 'Alex', 'Steve', 'Boldimore']
+    bartalk_name = random.choice(namelist)
     wait()
     print(f'You sit next to {bartalk_name}.')
     time.sleep(1)
-    print(
-        f'\033[3m{bartalk_name}\033[0m: The name is {bartalk_name} you know...'
-    )
+    print(f'\033[3m{bartalk_name}\033[0m: The name is {bartalk_name} you know...')
     time.sleep(2)
 
     while True:
-        y1 = input(
-            'Where am I, who are you, what do they sell, or leave? (1, 2, 3, or 4?)\n'
-        )
+        y1 = input('Where am I, who are you, what do they sell, or leave? (1, 2, 3, or 4?)\n')
 
         if y1 == "1":
-            print(
-                f"\033[3m{bartalk_name}\033[0m: Welcome to \033[3mTishun Village\033[0m."
-            )
+            print(f"\033[3m{bartalk_name}\033[0m: Welcome to \033[3mTishun Village\033[0m.")
             time.sleep(2)
             print(
                 f'\033[3m{bartalk_name}\033[0m: I guess it is pretty cool...')
 
         elif y1 == "2":
-            print(
-                f"\033[3m{bartalk_name}\033[0m: As I said, it's \033[3m{bartalk_name}\033[0m."
-            )
+            print(f"\033[3m{bartalk_name}\033[0m: As I said, it's \033[3m{bartalk_name}\033[0m.")
             if bartalk_name.lower() == "sophia":
                 print(f"\033[3m{name}\033[0m: Hey I know someone as Sophia!")
                 time.sleep(1)
@@ -389,9 +378,7 @@ def bartalk():
             time.sleep(2)
             print(f"\033[3m{bartalk_name}\033[0m: ...And some food.")
             time.sleep(2)
-            print(
-                f"\033[3m{bartalk_name}\033[0m: I heard he is even looking for a hire."
-            )
+            print(f"\033[3m{bartalk_name}\033[0m: I heard he is even looking for a hire.")
 
         elif y1 == "4":
             print(f'{name}: Thanks for the talk.\nYou say as you leave.')
@@ -402,19 +389,9 @@ def bartalk():
             print('Invalid')
 
 def bartender():
-    btgreetings = [
-        'How are you doing today?', 'What can I get you?',
-        "We don't have virgin here for the record.",
-        "I feel sorry for people who don't drink. When they wake up in the morning, that's as good as they're going to feel all day."
-    ]
-    btbuydrink = [
-        'That there is a good drink.', 'You vomit outside, not on me, got it?',
-        'Your order.'
-    ]
-    btleave = [
-        'Pleasure doing business.', 'Hope to see you again.',
-        'Until you order again.'
-    ]
+    btgreetings = ['How are you doing today?', 'What can I get you?',"We don't have virgin here for the record.","I feel sorry for people who don't drink. When they wake up in the morning, that's as good as they're going to feel all day."]
+    btbuydrink = ['That there is a good drink.', 'You vomit outside, not on me, got it?','Your order.']
+    btleave = ['Pleasure doing business.', 'Hope to see you again.','Until you order again.']
     choice_of_greeting = random.choice(btgreetings)
     bt = '\033[3mBartender\033[0m'
 
@@ -442,9 +419,7 @@ L for leave\n''')
 
             print('You take hold of your drink,')
             time.sleep(1)
-            t = input(
-                '\033[3m"Should I drink it, or should I take it with me?"\033[0m (Take or drink?)'
-            )
+            t = input('\033[3m"Should I drink it, or should I take it with me?"\033[0m (Take or drink?)')
             if t == 'drink':
                 print(
                     'You lift you chin and gulp the liquor to the last drop.')
@@ -453,9 +428,7 @@ L for leave\n''')
                 inventory.append('Rum')
                 print(f"\033[3m{name}\033[0m: I'll take this to go.")
                 time.sleep(1)
-                print(
-                    f'{bt}: As long as you use your own glass am fine with it.'
-                )
+                print(f'{bt}: As long as you use your own glass am fine with it.')
                 time.sleep(1)
 
         elif menu_entry == '2':
@@ -464,28 +437,20 @@ L for leave\n''')
 
             print('You take hold of your drink,')
             time.sleep(1)
-            t = input(
-                '\033[3m"Should I drink it, or should I take it with me?"\033[0m (Take or drink?)'
-            )
+            t = input('\033[3m"Should I drink it, or should I take it with me?"\033[0m (Take or drink?)')
             if t == 'drink':
-                print(
-                    'You sip your wine gently, soaking in the flavor and aroma.'
-                )
+                print('You sip your wine gently, soaking in the flavor and aroma.')
                 time.sleep(1)
             else:
                 inventory.append('Wine')
                 print(f"\033[3m{name}\033[0m: I'll take this to go.")
                 time.sleep(1)
-                print(
-                    f'{bt}: As long as you use your own glass am fine with it.'
-                )
+                print(f'{bt}: As long as you use your own glass am fine with it.')
                 time.sleep(1)
 
         elif menu_entry.lower() == 'hs':
             if coin < 6:
-                print(
-                    f"{bt}: Hey there, this ain't a charity, you got to have enough money for this liquor here."
-                )
+                print(f"{bt}: Hey there, this ain't a charity, you got to have enough money for this liquor here.")
             else:
                 drunk_chance = items['drinks']['dragons_blood'][
                     'drunk_effective'] - (player_stats['constitution'] / 10)
@@ -493,42 +458,28 @@ L for leave\n''')
                 if random_value < drunk_chance:
                     wasted = True
                     if dev_mode_enabled:
-                        print(
-                            f"drunk chance: {drunk_chance}\ncompared value: {random_value}"
-                        )
+                        print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
                 else:
                     wasted = False
                     if dev_mode_enabled:
-                        print(
-                            f"drunk chance: {drunk_chance}\ncompared value: {random_value}"
-                        )
+                        print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
 
                 print(f'{bt}: {choice_of_buydrink}')
                 time.sleep(1)
 
                 print('You take hold of your drink,')
                 time.sleep(1)
-                print(
-                    'You shakely bring the glass to your lips, as you take the first sip, and instant sharp flavor bursts in your mouth.'
-                )
+                print('You shakely bring the glass to your lips, as you take the first sip, and instant sharp flavor bursts in your mouth.')
                 time.sleep(1)
-                print(
-                    'Over time, the drink becomes more tame, and you notice more of the smoky flavor profile.'
-                )
+                print('Over time, the drink becomes more tame, and you notice more of the smoky flavor profile.')
                 time.sleep(1)
                 if wasted:
-                    print(
-                        'But, alas, it still hits your stomach with such force, you can barely finish.'
-                    )
+                    print('But, alas, it still hits your stomach with such force, you can barely finish.')
                     time.sleep(1)
-                    print(
-                        'Before you know it, your in the back alley of the tavern.'
-                    )
+                    print('Before you know it, your in the back alley of the tavern.')
                 else:
                     player_stats['constitution'] += .02
-                    print(
-                        f"{bt}: Well, I would not have guessed you'd be able to stand after that,"
-                    )
+                    print(f"{bt}: Well, I would not have guessed you'd be able to stand after that,")
 
         elif menu_entry.lower() == 'l':
             print(f'\033[3m{name}\033[0m: Thank you, but I think I am OK.')
@@ -536,11 +487,8 @@ L for leave\n''')
             print(f'{bt}: {choice_of_leave}')
             tavern()
 
-
 def travling_merchant():
-    print(
-        'A merchant, with his backpack filled to the brim with items, comes toward you.'
-    )
+    print('A merchant, with his backpack filled to the brim with items, comes toward you.')
     time.sleep(1)
     t = input('"Well hello there! Care to look in my shop?" (Y/N)\n')
     if t.lower() == 'y':

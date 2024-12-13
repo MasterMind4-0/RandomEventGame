@@ -47,16 +47,21 @@ items = {
 }
 
 player_stats = {'strength': 0.0, 'constitution': 0.0}
-
 name = None
 health = 20
-dev_mode_enabled = True
+dev_mode_enabled = False
 inventory = ["health_potion", "chain_mail"]
 weapon = 'iron_shortsword'
 coin = 100
-
 bartalk_name = None
 
+def error_found(to_do: str = 'Report the issue in GitHub!', error_name: str = None):
+    print(f'### ERROR: {error_name} ###')
+    print(to_do)
+
+def death():
+    print('You died!')
+    start()
 
 def wait():
     print('.\n')
@@ -72,30 +77,31 @@ def healthcap():
         health = 20
 
 class shop():
-    def __init__(self, name: str, item_pool: list = None):
+    def __init__(self, name: str, categories: list = None, item_pool: list = None):
         self.name: str = name
 
         if item_pool:
             self.item_pool = item_pool
         else:
-            self.item_pool = []
-
-            shop_type = random.choice(list(items.keys()))
-            self.item_pool.extend(items[shop_type].values())
-
-            while len(self.item_pool) < 3:
-                additional_shop_type = random.choice(list(items.keys()))
-                self.item_pool.extend(items[additional_shop_type].values())
+            self.item_pool = self.generate_random_item_pool(categories)
 
         self.item1 = random.choice(self.item_pool)
         self.item2 = random.choice(self.item_pool)
         self.item3 = random.choice(self.item_pool)
 
-        while self.item2 == self.item1:
-            self.item2 = random.choice(self.item_pool)
-        while self.item3 in (self.item1, self.item2):
-            self.item3 = random.choice(self.item_pool)
-
+    def generate_random_item_pool(self, categories):
+        all_items = []
+        if categories:
+            for category in categories:
+                if category in items:
+                    all_items.extend(items[category].values())
+        else:
+            for sub_items in items.values():
+                all_items.extend(sub_items.values())
+        
+        if len(all_items) < 3:
+            raise ValueError('ERROR')
+        return random.sample(all_items, k=3)
 
     def shop_menu(self):
         global coin, inventory
@@ -178,7 +184,7 @@ class shop():
                                 f"You sold {sell} for {selling_price} coins.")
                             break
                     else:
-                        print("ERROR: Item doesn't exist in items.")
+                        error_found("Try again", 'Item not found')
                 else:
                     print("You don't have that item.")
 
@@ -191,7 +197,6 @@ class shop():
                     random_event_picker()
             else:
                 pass
-
 
 class battle:
 
@@ -207,7 +212,15 @@ class battle:
     def fight(self):
         global health, inventory, weapon, healthp_amount, coin, player_stats
 
-        while health >= 1:
+        if dev_mode_enabled:
+            sim_question = input('Would you prefer to simulate a battle instead? (Y/N)\n')
+            if sim_question.lower() == 'y':
+                self.simulate_fight()
+            else:
+                pass
+
+        while health > 0:
+            healthp_amount = inventory.count('health_potion')
 
             if self.attackers_health <= 0:
                 player_stats[self.type_exp] += self.exp
@@ -241,12 +254,15 @@ class battle:
 """)
 
             if X.lower() == '1':
-                health += items['items']['health_potion']['healing']
-                inventory.remove('health_potion')
-                healthcap()
-                print("Consuming one health potion...")
-                time.sleep(1)
-                print(f"You now have {health} health and {healthp_amount} health potions.")
+                if 'health_potion' in inventory:
+                    health += items['items']['health_potion']['healing']
+                    inventory.remove('health_potion')
+                    healthcap()
+                    print("Consuming one health potion...")
+                    time.sleep(1)
+                    print(f"You now have {health} health and {inventory.count('health_potion')} health potions left.")
+                else:
+                    print("You don't have any health potions!")
             elif X.lower() == '2':
                 switched_weapon = input(
                     'What weapon would you like to switch to?\n')
@@ -274,11 +290,45 @@ class battle:
             else:
                 pass
 
-        if health >= 1:
-            print("Victory!")
-        else:
-            print("You died!")
+        death()
 
+    def simulate_fight(self):
+        global health, inventory, weapon, healthp_amount, coin, player_stats
+        healthp_amount = inventory.count('health_potion')
+        health_point = input('What should health be before you take a health potion?\n')
+        reward_yes = input('Receive rewards? (Y/N)\n')
+        reward_yes = reward_yes.lower() == 'y'
+
+        while health > 0:
+
+            if self.attackers_health <= 0:
+                player_stats[self.type_exp] += self.exp
+                print("You won the fight!")
+                if self.reward_item and reward_yes:
+                    inventory.append(self.reward_item)
+                    print(f'You are awarded with a {self.reward_item}!')
+                if self.reward_gold and reward_yes:
+                    coin += self.reward_gold
+                    print(f"You are awarded with {self.reward_gold} coins!")
+                return
+
+            if health <= round(int(health_point)):
+                if 'health_potion' in inventory:
+                    health += items['items']['health_potion']['healing']
+                    inventory.remove('health_potion')
+                    healthcap()
+                else:
+                    pass
+
+            hitq = random.randint(1, 10)
+            if hitq > 5:
+                self.attackers_health -= items['weapons'][weapon]['Damage']
+            else:
+                health -= self.attackers_damage
+        else:
+            pass
+
+        death()
 
 def random_event_picker():
     global healthp_amount, inventory, weapon, health
@@ -325,7 +375,14 @@ def random_event_picker():
             pass
             
 def start():
-    global name
+    global player_stats, name, health, dev_mode_enabled, inventory, weapon, coin
+    player_stats = {'strength': 0.0, 'constitution': 0.0}
+    name = None
+    health = 20
+    dev_mode_enabled = False
+    inventory = ["health_potion", "chain_mail"]
+    weapon = 'iron_shortsword'
+    coin = 100
     print('Hello!')
     time.sleep(.5)
     print('Are you ready for an adventure??')
@@ -333,6 +390,8 @@ def start():
     print('Yeah, I thought you were.')
     print("Ok, first, let's create your character:")
     name = input("What will your character's name be?\n")
+    if name.lower() == 'dev':
+        dev_mode_enabled = True
     print(f"That's not a bad name, {name}!")
     time.sleep(.5)
     print('Well, that is all, let us begin!')
@@ -542,11 +601,11 @@ def travling_merchant():
     time.sleep(1)
     t = input('"Well hello there! Care to look in my shop?" (Y/N)\n')
     if t.lower() == 'y':
+        merchant_shop = shop("Merchant's Shop", ['weapon'])
         print('The merchant smiles,')
         time.sleep(.5)
         print('"Wonderful! See what you like."')
         time.sleep(1)
-        merchant_shop = shop("Merchant's Shop")
         merchant_shop.shop_menu()
     else:
         print('The merchant wonders away in solom.')
@@ -616,7 +675,8 @@ def back_alley():
                 print(f'{thug_leader}: Not that hard at all...')
                 random_event_picker()
             else:
-                print('ERROR: Invalid.')
+                error_found("Try again", "Invalid option")
+                back_alley()
     elif response == '3':
         inventory.remove(inventory)
         print(f"\033[3m{name}\033[0m: OK, OK! Here.")
@@ -636,8 +696,8 @@ def back_alley():
 
 def town():
 
-    store1 = shop("Sasha's Weapons", [items['weapons']['iron_shortsword'], items['weapons']['crossbow']])
-    store2 = shop("Tintoe's Couldron", [items['items']['health_potion']])
+    store1 = shop("Sasha's Weapons", item_pool=[items['weapons']['iron_shortsword'], items['weapons']['crossbow']])
+    store2 = shop("Tintoe's Couldron", item_pool=[items['items']['health_potion']])
 
     print('\033[3m"You come across a village, should you enter is the question at hand..."\033[0m')
     time.sleep(1)
@@ -674,7 +734,7 @@ def town():
         elif to_do.lower() == 'leave':
             random_event_picker()
         else:
-            print('ERROR: Not an option')
+            error_found("Try again", "Invalid")
             time.sleep(1)
 
 start()

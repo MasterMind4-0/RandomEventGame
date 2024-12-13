@@ -95,10 +95,7 @@ class shop():
     def shop_menu(self):
         global coin, inventory
         traded = False
-        trader_prompts = [
-            'What can I do you for?', 'What will it be today?',
-            'Anything catching your eye?'
-        ]
+        trader_prompts = ['What can I do you for?', 'What will it be today?', 'Anything catching your eye?']
 
         while True:
             trader_prompt = random.choice(trader_prompts)
@@ -159,12 +156,12 @@ class shop():
 
         Type the name of the item you'd like to sell\n
             ''')
-                sell = sell.strip().lower()
+                sell = sell.strip().lower().replace(" ", "")
 
                 if sell in inventory:
                     traded = True
 
-                    for item_type, item_category in items.items():
+                    for item_category in items.items():
                         if sell in item_category:
                             item = item_category[sell]
                             original_price = item['price']
@@ -180,30 +177,46 @@ class shop():
                 else:
                     print("You don't have that item.")
 
-            else:
+            elif X == '':
                 if traded:
                     print('The merchant waves goodbye as you leave.')
                     random_event_picker()
                 else:
                     print('You leave as the merchant sighs.')
                     random_event_picker()
+            else:
+                pass
 
 
 class battle:
 
-    def __init__(self, attackers_name: str, attackers_health: int,
-                 attackers_damage: int):
+    def __init__(self, attackers_name: str, attackers_health: int, attackers_damage: int, reward_gold: int, reward_item: str, exp: float, type_exp: str):
         self.attackers_name: str = attackers_name
         self.attackers_health: int = attackers_health
         self.attackers_damage: int = attackers_damage
+        self.reward_gold: int = reward_gold
+        self.reward_item: str = reward_item
+        self.exp: float = exp
+        self.type_exp: str = type_exp
 
     def fight(self):
-        global health, inventory, weapon, healthp_amount
+        global health, inventory, weapon, healthp_amount, coin, player_stats
 
         while health >= 1:
 
             if self.attackers_health <= 0:
+                player_stats[self.type_exp] += self.exp
                 print("You won the fight!")
+                if self.reward_item:
+                    inventory.append(self.reward_item)
+                    print(f'You are award with a {self.reward_item}')
+                else:
+                    pass
+                if self.reward_gold:
+                    coin += self.reward_gold
+                    print(f"You are award with {self.reward_gold} coins!")
+                else:
+                    pass
                 break
 
             time.sleep(1)
@@ -238,7 +251,7 @@ class battle:
                     weapon = switched_weapon
                 else:
                     print("You don't have that weapon.")
-            else:
+            elif X == '':
                 print(f"The {self.attackers_name} charges towards you,")
                 time.sleep(.5)
                 hitq = random.randint(1, 10)
@@ -253,6 +266,8 @@ class battle:
                     print(f"The {self.attackers_name} hit you!")
                     time.sleep(.5)
                     print(f"You have {health} health left!")
+            else:
+                pass
 
         if health >= 1:
             print("Victory!")
@@ -298,9 +313,12 @@ def random_event_picker():
                 weapon = switched_weapon
             else:
                 print("You don't have that weapon.")
-        else:
+        elif X == '':
             events = [travling_merchant, tavern, kidnappers, town]
             random.choice(events)()
+        else:
+            pass
+            
 
 def start():
     global name
@@ -361,8 +379,7 @@ def bartalk():
         if y1 == "1":
             print(f"\033[3m{bartalk_name}\033[0m: Welcome to \033[3mTishun Village\033[0m.")
             time.sleep(2)
-            print(
-                f'\033[3m{bartalk_name}\033[0m: I guess it is pretty cool...')
+            print(f'\033[3m{bartalk_name}\033[0m: I guess it is pretty cool...')
 
         elif y1 == "2":
             print(f"\033[3m{bartalk_name}\033[0m: As I said, it's \033[3m{bartalk_name}\033[0m.")
@@ -466,7 +483,6 @@ L for leave\n''')
 
                 print(f'{bt}: {choice_of_buydrink}')
                 time.sleep(1)
-
                 print('You take hold of your drink,')
                 time.sleep(1)
                 print('You shakely bring the glass to your lips, as you take the first sip, and instant sharp flavor bursts in your mouth.')
@@ -475,8 +491,7 @@ L for leave\n''')
                 time.sleep(1)
                 if wasted:
                     print('But, alas, it still hits your stomach with such force, you can barely finish.')
-                    time.sleep(1)
-                    print('Before you know it, your in the back alley of the tavern.')
+                    back_alley()
                 else:
                     player_stats['constitution'] += .02
                     print(f"{bt}: Well, I would not have guessed you'd be able to stand after that,")
@@ -486,6 +501,9 @@ L for leave\n''')
             time.sleep(1)
             print(f'{bt}: {choice_of_leave}')
             tavern()
+        
+        else:
+            pass
 
 def travling_merchant():
     print('A merchant, with his backpack filled to the brim with items, comes toward you.')
@@ -502,7 +520,7 @@ def travling_merchant():
         print('The merchant wonders away in solom.')
 
 def kidnappers():
-    thug_fight = battle('Thugs', 10, 2)
+    thug_fight = battle('Thugs', 10, 2, 20, "", .04, 'strength')
     print('As you walk along the weaving path in the forest,')
     time.sleep(1)
     print('A group of thugs jumps from the bushes.')
@@ -542,7 +560,7 @@ def back_alley():
     response = input('Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n')
 
     if response == '1':
-        thug_fight = battle('Thugs', 20, 3)
+        thug_fight = battle('Thugs', 20, 3, 20, "", .02, 'strength')
         print(f'\033[3m{name}\033[0m: As, I said, back the HELL AWAY!')
         time.sleep(1)
         thug_fight.fight()

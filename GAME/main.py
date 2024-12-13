@@ -35,7 +35,7 @@ items = {
         },
         'wine': {
             'name': 'Wine',
-            'drunk_effective': .45,
+            'drunk_effective': .25,
             'price': 4
         },
         'dragons_blood': {
@@ -182,7 +182,7 @@ class shop():
                 else:
                     print("You don't have that item.")
 
-            elif X == '':
+            elif not t:
                 if traded:
                     print('The merchant waves goodbye as you leave.')
                     random_event_picker()
@@ -543,7 +543,7 @@ def travling_merchant():
     t = input('"Well hello there! Care to look in my shop?" (Y/N)\n')
     if t.lower() == 'y':
         print('The merchant smiles,')
-        time.sleep(.25)
+        time.sleep(.5)
         print('"Wonderful! See what you like."')
         time.sleep(1)
         merchant_shop = shop("Merchant's Shop")
@@ -552,13 +552,13 @@ def travling_merchant():
         print('The merchant wonders away in solom.')
 
 def kidnappers():
-    thug_fight = battle('Thugs', 10, 2, 20, "", .04, 'strength')
+    kidnappers_fight = battle('Thugs', 10, 2, 20, "", .02, 'strength')
     print('As you walk along the weaving path in the forest,')
     time.sleep(1)
     print('A group of thugs jumps from the bushes.')
     time.sleep(1)
     print("THUG: Get em boys!")
-    thug_fight.fight()
+    kidnappers_fight.fight()
 
 def back_alley():
     global coin
@@ -592,7 +592,7 @@ def back_alley():
     response = input('Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n')
 
     if response == '1':
-        thug_fight = battle('Thugs', 20, 3, 20, "", .02, 'strength')
+        thug_fight = battle('Thugs', 20, 3, 20, "", .04, 'strength')
         print(f'\033[3m{name}\033[0m: As, I said, back the HELL AWAY!')
         time.sleep(1)
         thug_fight.fight()
@@ -623,7 +623,7 @@ def back_alley():
         time.sleep(1)
         print('\033[3m"You hand the thugs all your things, they mouths foam with envy. A good haul for them."\033[0m')
         time.sleep(1)
-        print(f"{thug_leader}: I need you'd come to your senses friend!")
+        print(f"{thug_leader}: I knew you'd come to your senses friend!")
         time.sleep(.5)
         print(f"{thug_leader}: Yeah, these knuckle-heads didn't believe me, but I knew it." )
         time.sleep(1)

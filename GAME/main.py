@@ -76,7 +76,7 @@ def healthcap():
     if health > 20:
         health = 20
 
-class shop():
+class shop:
     def __init__(self, name: str, categories: list = None, item_pool: list = None):
         self.name: str = name
 

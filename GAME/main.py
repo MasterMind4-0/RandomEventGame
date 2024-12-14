@@ -142,19 +142,28 @@ class shop:
         self.item2 = random.choice(self.item_pool)
         self.item3 = random.choice(self.item_pool)
 
-    def generate_random_item_pool(self, categories):
-        all_items = []
-        if categories:
-            for category in categories:
-                if category in dictitems:
-                    all_items.extend(dictitems[category].values())
-        else:
-            for sub_items in dictitems.values():
-                all_items.extend(sub_items.values())
-        
-        if len(all_items) < 3:
-            raise ValueError('ERROR')
-        return random.sample(all_items, k=3)
+    def generate_random_item_pool(self, categories = None):
+        allowed_categories = categories if categories else ['weapons', 'items']
+
+        weapon_items = dictitems['weapons'].values() if 'weapons' in allowed_categories else []
+        item_items = dictitems['items'].values() if 'items' in allowed_categories else []
+
+        if len(weapon_items) + len(item_items) < 3:
+            raise ValueError("Not enough items to populate the shop.")
+
+        selected_items = []
+        if weapon_items:
+            selected_items.append(random.choice(list(weapon_items)))
+        if item_items:
+            selected_items.append(random.choice(list(item_items)))
+
+        remaining_pool = list(weapon_items) + list(item_items)
+        while len(selected_items) < 3:
+            random_item = random.choice(remaining_pool)
+            if random_item not in selected_items:
+                selected_items.append(random_item)
+
+        return selected_items
 
     def shop_menu(self):
         global coin, inventory
@@ -179,7 +188,7 @@ class shop:
 
         1. Buy items
         2. Sell items\n
-            ''')
+        ''')
             t = input('')
             if t == '1':
                 print(f'{tr}: {trader_prompt}')
@@ -220,36 +229,36 @@ class shop:
         Inventory: {inventory}
 
         Type the name of the item you'd like to sell\n
-            ''')
+        ''')
                 sell = sfix(sell)
 
                 if sell in inventory:
                     traded = True
-
-                    for item_category in dictitems.items():
-                        if sell in item_category:
-                            item = item_category[sell['name']]
+                    item_found = False
+                    for items in dictitems.values():
+                        if sell in items:
+                            item = items[sell]
                             original_price = item['price']
-                            selling_price = original_price / 2
+                            selling_price = original_price // 2
 
                             coin += selling_price
                             inventory.remove(sell)
-                            print(f"You sold {sell['dname']} for {selling_price} coins.")
+                            print(f"You sold {item['dname']} for {selling_price} coins.")
+                            item_found = True
                             break
-                    else:
-                        error_found("Try again", 'Item not found')
+
+                    if not item_found:
+                        error_found("Try again", "Item not found in shop database")
                 else:
-                    print("You don't have that item.")
+                    error_found(error_name="You don't have that item")
 
             elif not t:
                 if traded:
-                    print('The merchant waves goodbye as you leave.')
+                    print('The trader waves goodbye as you leave.')
                     random_event_picker()
                 else:
-                    print('You leave as the merchant sighs.')
+                    print('You leave as the trader sighs.')
                     random_event_picker()
-            else:
-                pass
 
 class tavern:
     def __init__(self, special: str = None, item_pool: list = None, name: str = None):
@@ -802,7 +811,7 @@ def travling_merchant():
     time.sleep(1)
     t = input('"Well hello there! Care to look in my shop?" (Y/N)\n')
     if t.lower() == 'y':
-        merchant_shop = shop("Merchant's Shop", ['weapon', 'items'])
+        merchant_shop = shop("Merchant's Shop")
         print('The merchant smiles,')
         time.sleep(.5)
         print('"Wonderful! See what you like."')
@@ -910,8 +919,8 @@ def town():
         random_event_picker()
 
     print('\033[3mYou enter the village.\033[0m')
-    store1 = shop("Sasha's", ['weapon', 'items'])
-    store2 = shop("Tintoe's General", ['weapons', 'items'])
+    store1 = shop("Shop")
+    store2 = shop("Shop")
     time.sleep(1)
     while True:
         to_do = input(f'''
@@ -921,8 +930,8 @@ def town():
 
         Hit ENTER to continue your journey.
 
-        1. Go to {store1.name}?
-        2. Go to {store2.name}?
+        1. Go to first shop?
+        2. Go to the second shop?
         3. Go to local tavern?\n
         ''')
         if to_do == '1':

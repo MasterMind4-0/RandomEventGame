@@ -9,68 +9,79 @@ def generate_healing(x: int, y: int):
 
 dictitems = {
     'weapons': {
-        'iron_shortsword': {
-            'name': 'iron_shortsword',
+        'ironshortsword': {
+            'name': 'ironshortsword',
+            'dname': 'Iron Shortsword',
             'Damage': 2,
             'price': 15
         },
         'crossbow': {
             'name': 'crossbow',
+            'dname': 'Crossbow',
             'Damage': 3,
             'price': 15
         },
         'dagger': {
             'name': 'dagger',
+            'dname': 'Dagger',
             'Damage': 1,
-            'price': 10
+            'price': 8
         }
     },
     'items': {
-        'health_potion': {
-            'name': 'health_potion',
+        'healthpotion': {
+            'name': 'healthpotion',
+            'dname': 'Health Potion',
             'healing': generate_healing(1, 5),
             'price': 5
         },
-        'greater_health_potion': {
-            'name': 'greater_health_potion',
+        'greaterhealthpotion': {
+            'name': 'greaterhealthpotion',
+            'dname': 'Greater health potion',
             'healing': generate_healing(1, 10),
             'price': 15
         },
-        'greatest_health_potion': {
-            'name': 'greatest_health_potion',
+        'greatesthealthpotion': {
+            'name': 'greatesthealthpotion',
+            'dname': 'Greatest health potion',
             'healing': generate_healing(1, 20),
             'price': 25
         },
     },
     'drinks': {
         'special_drinks': {
-            'dragons_blood': {
-            'name': "Dragon's Blood",
-            'description': "This ale is dark and thick. It's a little bitter with a smokey after taste, an acquired taste for many. The bartender warns you that this drink will certainly leave you wasted.",
-            'drunk_effective': .99,
-            'exp': .02,
-            'price': 6
+            'dragonsblood': {
+                'name': 'dragonsblood',
+                'dname': "Dragon's Blood",
+                'description': "This ale is dark and thick. It's a little bitter with a smokey after taste, an acquired taste for many. The bartender warns you that this drink will certainly leave you wasted.",
+                'drunk_effective': .85,
+                'exp': .02,
+                'price': 6
             },
-            'goblin_vomit': {
-                'name': 'Goblin Vomit',
+            'goblinvomit': {
+                'name': 'goblinvomit',
+                'dname': 'Goblin Vomit',
                 'description': "This dark green that reminds many of goblin vomit. It's surprising thin, for its name, but why many avoid it is because of its horrid bitter taste.",
-                'drunk_effective': .99,
+                'drunk_effective': .90,
                 'exp': .03,
                 'price': 5
             }
         },
         'rum': {
-            'name': 'Rum',
+            'name': 'rum',
+            'dname': 'Rum',
             'drunk_effective': .7,
             'price': 2
         },
         'wine': {
-            'name': 'Wine',
+            'name': 'wine',
+            'dname': 'Wine',
             'drunk_effective': .25,
             'price': 3
         },
         'beer': {
-            'name': 'Beer',
+            'name': 'beer',
+            'dname': 'Beer',
             'drunk_effective': .6,
             'price': 2
         }
@@ -82,14 +93,20 @@ player_stats = {'strength': 0.0, 'constitution': 0.0}
 name = None
 health = 20
 dev_mode_enabled = False
-inventory = ["health_potion", "chain_mail"]
-weapon = 'iron_shortsword'
-coin = 100
-swear = False
-h = 'heck'
+inventory = ["healthpotion"]
+weapon = 'ironshortsword'
+coin = 0
+
+def sfix(str_to_be_fixed: str):
+    str_to_be_fixed = str_to_be_fixed.lower()
+    str_to_be_fixed = str_to_be_fixed.replace(' ', '')
+    return str_to_be_fixed
 
 def error_found(to_do: str = 'Report the issue in GitHub!', error_name: str = None):
-    print(f'###~~~--- ERROR: {error_name} ---~~~###')
+    if not error_name:
+        print('###~~~--- ERROR ---~~~###')
+    else:
+        print(f'###~~~--- ERROR: {error_name} ---~~~###')
     print(to_do)
 
 def death():
@@ -142,36 +159,38 @@ class shop:
     def shop_menu(self):
         global coin, inventory
         traded = False
-        trader_prompts = ['What can I do you for?', 'What will it be today?', 'Anything catching your eye?']
+        trader_prompts = ['What can I do you for?', 'What will it be today?', 'Anything catching your eye?', "Don't bargin, I am not going to give in.", "I don't do sales."]
+        tr = '\033[3mTrader\033[0m'
 
         while True:
             trader_prompt = random.choice(trader_prompts)
             print(f'''
-             {self.name}
+        {self.name}
 
-            1. {self.item1['name']} ({self.item1['price']} coins)
-            2. {self.item2['name']} ({self.item2['price']} coins)
-            3. {self.item3['name']} ({self.item3['price']} coins)
+        1. {self.item1['dname']} ({self.item1['price']} coins)
+        2. {self.item2['dname']} ({self.item2['price']} coins)
+        3. {self.item3['dname']} ({self.item3['price']} coins)
 
-            Coin: {coin}
+        Coin: {coin}
 
-            Inventory: {inventory}\n
+        Inventory: {inventory}
+
+        Hit ENTER to leave.
+
+        1. Buy items
+        2. Sell items\n
             ''')
-            print('1. Buy items')
-            print('2. Sell items')
-            print('\nPress ENTER to leave')
             t = input('')
             if t == '1':
-                print(trader_prompt)
+                print(f'{tr}: {trader_prompt}')
                 time.sleep(1)
-                bought_item = input(
-                    'What would you like to buy? (1, 2, or 3?)\n')
+                bought_item = input('What would you like to buy? (1, 2, or 3?)\n')
 
                 if bought_item == '1' and coin >= self.item1['price']:
                     traded = True
                     coin -= self.item1['price']
                     inventory.append(self.item1['name'])
-                    print(f'You bought a {self.item1["name"]}!')
+                    print(f'You bought a {self.item1["dname"]}!')
                     time.sleep(1)
                     print(f'You now have {coin} coins left.')
 
@@ -179,7 +198,7 @@ class shop:
                     traded = True
                     coin -= self.item2['price']
                     inventory.append(self.item2['name'])
-                    print(f'You bought a {self.item2["name"]}!')
+                    print(f'You bought a {self.item2["dname"]}!')
                     time.sleep(1)
                     print(f'You now have {coin} coins left.')
 
@@ -187,7 +206,7 @@ class shop:
                     traded = True
                     coin -= self.item3['price']
                     inventory.append(self.item2['name'])
-                    print(f'You bought a {self.item3["name"]}!')
+                    print(f'You bought a {self.item3["dname"]}!')
                     time.sleep(1)
                     print(f'You now have {coin} coins left.')
 
@@ -195,7 +214,6 @@ class shop:
                     print('You do not have enough money to buy that item.')
 
             elif t == '2':
-                print(trader_prompt)
                 sell = input(f'''
         Selling
 
@@ -203,21 +221,20 @@ class shop:
 
         Type the name of the item you'd like to sell\n
             ''')
-                sell = sell.strip().lower().replace(" ", "")
+                sell = sfix(sell)
 
                 if sell in inventory:
                     traded = True
 
                     for item_category in dictitems.items():
                         if sell in item_category:
-                            item = item_category[sell]
+                            item = item_category[sell['name']]
                             original_price = item['price']
                             selling_price = original_price / 2
 
                             coin += selling_price
                             inventory.remove(sell)
-                            print(
-                                f"You sold {sell} for {selling_price} coins.")
+                            print(f"You sold {sell['dname']} for {selling_price} coins.")
                             break
                     else:
                         error_found("Try again", 'Item not found')
@@ -255,12 +272,12 @@ class tavern:
             self.item1 = random.choice(self.item_pool)
             self.item2 = random.choice(self.item_pool)
         else:
-            self.item1 = self.item2 = {'name': 'Out of Stock', 'price': 0}
+            self.item1 = self.item2 = {'dname': 'Out of Stock', 'price': 0}
 
         if len(self.special) > 0:
             self.house_special = random.choice(self.special)
         else:
-            self.house_special = {'name': 'Out of Stock', 'price': 0, 'description': 'None available.'}
+            self.house_special = {'dname': 'Out of Stock', 'price': 0, 'description': 'None available.'}
 
     def generate_random_item_pool(self, category, exclude=None):
         all_items = []
@@ -270,7 +287,6 @@ class tavern:
             if isinstance(value, dict) and 'name' in value:
                 all_items.append(value)
         return all_items
-
 
     def enter_tavern(self):
         print('You entered tavern.')
@@ -377,20 +393,21 @@ class tavern:
             menu_entry = input(f'''
         {self.name}'s menu
 
-        1. {self.item1['name']} ({self.item1['price']} coins)
-        2. {self.item2['name']} ({self.item2['price']} coins)
+        Hit ENTER to leave
 
-        For HOUSE SPECIAL, type HS: {self.house_special['name']} ({self.house_special['price']} coins)
+        1. {self.item1['dname']} ({self.item1['price']} coins)
+        2. {self.item2['dname']} ({self.item2['price']} coins)
 
-        {self.house_special['description']}
+        For HOUSE SPECIAL, type HS: {self.house_special['dname']} ({self.house_special['price']} coins)
 
-        ENTER to leave\n''')
+        {self.house_special['description']}\n
+        ''')
 
             if menu_entry == '1':
                 if coin < self.item1['price']:
                     print(f"{bt}: Hey there, this ain't a charity, you got to have enough money for this liquor here.")
                 else:
-                    drunk_chance = dictitems['drinks'][self.item1]['drunk_effective'] - (player_stats['constitution'] / 10)
+                    drunk_chance = self.item1['drunk_effective'] - (player_stats['constitution'] / 10)
                     random_value = random.random()
                     if random_value < drunk_chance:
                         wasted = True
@@ -401,38 +418,38 @@ class tavern:
                         if dev_mode_enabled:
                             print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
 
-                coin -= self.item1['price']
-                print(f'{bt}: {choice_of_buydrink}')
-                time.sleep(1)
-                print('You take hold of your drink,')
-                time.sleep(1)
-                if wasted and self.item1 == 'wine':
-                    print('You gently sip your drink,')
+                    coin -= self.item1['price']
+                    print(f'{bt}: {choice_of_buydrink}')
                     time.sleep(1)
-                    print('But before long, you feel tipsy.')
+                    print('You take hold of your drink,')
                     time.sleep(1)
-                    print('The last thing you hear before passing out is the bartender.')
-                    time.sleep(1)
-                    print(f"{bt}: How the {h} do you pass out from bloody wine?")
-                    back_alley()
-                elif self.item1 == 'wine':
-                    print('You sip your wine gently, soaking in the flavor and aroma.')
-                    time.sleep(1)
-                elif wasted:
-                    print('After downing your mug, you can barely stand.')
-                    time.sleep(1)
-                    print('You drunkly walk outside, before you pass out.')
-                    back_alley()
-                else:
-                    print('You lift you chin and gulp the liquor to the last drop.')
-                    time.sleep(1)
+                    if wasted and self.item1 == 'wine':
+                        print('You gently sip your drink,')
+                        time.sleep(1)
+                        print('But before long, you feel tipsy.')
+                        time.sleep(1)
+                        print('The last thing you hear before passing out is the bartender.')
+                        time.sleep(1)
+                        print(f"{bt}: How the hell do you pass out from bloody wine?")
+                        back_alley()
+                    elif self.item1 == 'wine':
+                        print('You sip your wine gently, soaking in the flavor and aroma.')
+                        time.sleep(1)
+                    elif wasted:
+                        print('After downing your mug, you can barely stand.')
+                        time.sleep(1)
+                        print('You drunkly walk outside, before you pass out.')
+                        back_alley()
+                    else:
+                        print('You lift you chin and gulp the liquor to the last drop.')
+                        time.sleep(1)
 
 
             elif menu_entry == '2':
                 if coin < self.item2['price']:
                     print(f"{bt}: Hey there, this ain't a charity, you got to have enough money for this liquor here.")
                 else:
-                    drunk_chance = dictitems['drinks'][self.item2]['drunk_effective'] - (player_stats['constitution'] / 10)
+                    drunk_chance = self.item2['drunk_effective'] - (player_stats['constitution'] / 10)
                     random_value = random.random()
                     if random_value < drunk_chance:
                         wasted = True
@@ -443,31 +460,31 @@ class tavern:
                         if dev_mode_enabled:
                             print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
 
-                coin -= self.item2['price']
-                print(f'{bt}: {choice_of_buydrink}')
-                time.sleep(1)
-                print('You take hold of your drink,')
-                time.sleep(1)
-                if wasted and self.item2 == 'wine':
-                    print('You gently sip your drink,')
+                    coin -= self.item2['price']
+                    print(f'{bt}: {choice_of_buydrink}')
                     time.sleep(1)
-                    print('But before long, you feel tipsy.')
+                    print('You take hold of your drink,')
                     time.sleep(1)
-                    print('The last thing you hear before passing out is the bartender.')
-                    time.sleep(1)
-                    print(f"{bt}: How the hell do you pass out from bloody wine?")
-                    back_alley()
-                elif self.item2 == 'wine':
-                    print('You sip your wine gently, soaking in the flavor and aroma.')
-                    time.sleep(1)
-                elif wasted:
-                    print('After downing your mug, you can barely stand.')
-                    time.sleep(1)
-                    print('You drunkly walk outside, before you pass out.')
-                    back_alley()
-                else:
-                    print('You lift you chin and gulp the liquor to the last drop.')
-                    time.sleep(1)
+                    if wasted and self.item2 == 'wine':
+                        print('You gently sip your drink,')
+                        time.sleep(1)
+                        print('But before long, you feel tipsy.')
+                        time.sleep(1)
+                        print('The last thing you hear before passing out is the bartender.')
+                        time.sleep(1)
+                        print(f"{bt}: How the hell do you pass out from bloody wine?")
+                        back_alley()
+                    elif self.item2 == 'wine':
+                        print('You sip your wine gently, soaking in the flavor and aroma.')
+                        time.sleep(1)
+                    elif wasted:
+                        print('After downing your mug, you can barely stand.')
+                        time.sleep(1)
+                        print('You drunkly walk outside, before you pass out.')
+                        back_alley()
+                    else:
+                        print('You lift you chin and gulp the liquor to the last drop.')
+                        time.sleep(1)
 
 
             elif menu_entry.lower() == 'hs':
@@ -485,28 +502,28 @@ class tavern:
                         if dev_mode_enabled:
                             print(f"drunk chance: {drunk_chance}\ncompared value: {random_value}")
 
-                    coin -= self.house_special['price']
-                    print(f'{bt}: {choice_of_buydrink}')
-                    time.sleep(1)
-                    print('You take hold of your drink,')
-                    time.sleep(1)
-                    print('You shakely bring the glass to your lips, as you take the first sip, and instant sharp flavor bursts in your mouth.')
-                    time.sleep(1)
-                    print('Over time, the drink becomes more tame, and you notice more of its flavor profile.')
-                    time.sleep(1)
-                    if wasted:
-                        print('But, alas, it still hits your stomach with such force, you can barely finish.')
-                        back_alley()
-                    else:
-                        if dev_mode_enabled:
-                            print(f'Previous constitution score: {player_stats["constitution"]}')
-                            print(f'Applied exp: {self.house_special['exp']}')
-                            player_stats['constitution'] += self.house_special['exp']
-                            print(f'After: {player_stats["constitution"]}')
-                        else:
-                            player_stats['constitution'] += self.house_special['exp']
-                        print(f"{bt}: Well, I would not have guessed you'd be able to stand after that,")
+                        coin -= self.house_special['price']
+                        print(f'{bt}: {choice_of_buydrink}')
                         time.sleep(1)
+                        print('You take hold of your drink,')
+                        time.sleep(1)
+                        print('You shakely bring the glass to your lips, as you take the first sip, and instant sharp flavor bursts in your mouth.')
+                        time.sleep(1)
+                        print('Over time, the drink becomes more tame, and you notice more of its flavor profile.')
+                        time.sleep(1)
+                        if wasted:
+                            print('But, alas, it still hits your stomach with such force, you can barely finish.')
+                            back_alley()
+                        else:
+                            if dev_mode_enabled:
+                                print(f'Previous constitution score: {player_stats["constitution"]}')
+                                print(f'Applied exp: {self.house_special['exp']}')
+                                player_stats['constitution'] += self.house_special['exp']
+                                print(f'After: {player_stats["constitution"]}')
+                            else:
+                                player_stats['constitution'] += self.house_special['exp']
+                            print(f"{bt}: Well, I would not have guessed you'd be able to stand after that,")
+                            time.sleep(1)
 
             elif not menu_entry:
                 print(f'\033[3m{name}\033[0m: Thank you, but I think I am OK.')
@@ -536,7 +553,7 @@ class battle:
             self.reward_gold: int = reward_gold
 
     def fight(self):
-        global health, inventory, weapon, healthp_amount, coin, player_stats
+        global health, inventory, weapon, coin, player_stats
 
         if dev_mode_enabled:
             sim_question = input('Would you prefer to simulate a battle instead? (Y/N)\n')
@@ -545,8 +562,6 @@ class battle:
                 return
 
         while health > 0:
-            healthp_amount = inventory.count('health_potion')
-
             if self.attackers_health <= 0:
                 player_stats[self.type_exp] += self.exp
                 print("You won the fight!")
@@ -564,24 +579,44 @@ class battle:
         Your health: {health}
 
         Inventory: {inventory}
-        Weapon: {weapon}
+        Weapon: {dictitems["weapons"][weapon]['dname']}
 
         Actions:
 
-        Hit ENTER to continue walking
+        Hit ENTER to continue the battle
 
-        1. Take health potion (You have {healthp_amount})
+        1. Take health potion (You have {inventory.count('healthpotion') + inventory.count('greaterhealthpotion') + inventory.count('greatesthealthpotion')})
         2. Switch equiped weapon\n
 """)
 
             if X.lower() == '1':
-                if 'health_potion' in inventory:
-                    health += dictitems['items']['health_potion']['healing']
-                    inventory.remove('health_potion')
-                    healthcap()
-                    print("Consuming one health potion...")
+                if 'healthpotion' in inventory or 'greaterhealthpotion' in inventory or 'greatesthealthpotion' in inventory:
+                    which_health = input(f'\nHit ENTER to leave\n\n1. Health potion ({inventory.count('healthpotion')})\n2. Greater health potion ({inventory.count('greaterhealthpotion')})\n3. Greatest health potion ({inventory.count('greatesthealthpotion')})\n')
+                    if which_health == '1':
+                        if 'healthpotion' in inventory:
+                            health += dictitems['items']['healthpotion']['healing']
+                            inventory.remove('healthpotion')
+                            healthcap()
+                            print('Consuming one health potion...')
+                        else:
+                            print("You don't have health potions!")
+                    elif which_health == '2':
+                        if 'greaterhealthpotion' in inventory:
+                            health += dictitems['items']['greaterhealthpotion']['healing']
+                            inventory.remove('greaterhealthpotion')
+                            healthcap()
+                            print('Consuming one health potion...')
+                        else:
+                            print("You don't have greater health potions!")
+                    elif which_health == '3':
+                        if 'greatesthealthpotion' in inventory:
+                            health += dictitems['items']['greatesthealthpotion']['healing']
+                            inventory.remove('greatesthealthpotion')
+                            healthcap()
+                            print("Consuming one health potion...")
+                        else:
+                            print("You don't have greatest health potions!")
                     time.sleep(1)
-                    print(f"You now have {health} health and {inventory.count('health_potion')} health potions left.")
                 else:
                     print("You don't have any health potions!")
             elif X.lower() == '2':
@@ -614,11 +649,14 @@ class battle:
         death()
 
     def simulate_fight(self):
-        global health, inventory, weapon, healthp_amount, coin, player_stats
-        healthp_amount = inventory.count('health_potion')
+        global health, inventory, weapon, coin, player_stats
         health_point = input('What should health be before you take a health potion?\n')
         reward_yes = input('Receive rewards? (Y/N)\n')
-        reward_yes = reward_yes.lower() == 'y'
+        if health_point:
+            pass
+        else:
+            health_point = 6
+        reward_yes = sfix(reward_yes) == 'y'
 
         while health > 0:
 
@@ -634,12 +672,29 @@ class battle:
                 return
 
             if health <= round(int(health_point)):
-                if 'health_potion' in inventory:
-                    health += dictitems['items']['health_potion']['healing']
-                    inventory.remove('health_potion')
-                    healthcap()
-                else:
-                    pass
+                if 'healthpotion' in inventory or 'greaterhealthpotion' in inventory or 'greatesthealthpotion' in inventory:
+                    which_health = input(f'health: {health}\n\nHit ENTER to leave\n\n1. Health potion ({inventory.count('healthpotion')})\n2. Greater health potion ({inventory.count('greaterhealthpotion')})\n3. Greatest health potion ({inventory.count('greatesthealthpotion')})\n')
+                    if which_health == '1':
+                        if 'healthpotion' in inventory:
+                            health += dictitems['items']['healthpotion']['healing']
+                            inventory.remove('healthpotion')
+                            healthcap()
+                        else:
+                            print("You don't have health potions!")
+                    elif which_health == '2':
+                        if 'greaterhealthpotion' in inventory:
+                            health += dictitems['items']['greaterhealthpotion']['healing']
+                            inventory.remove('greaterhealthpotion')
+                            healthcap()
+                        else:
+                            print("You don't have greater health potions!")
+                    elif which_health == '3':
+                        if 'greatesthealthpotion' in inventory:
+                            health += dictitems['items']['greatesthealthpotion']['healing']
+                            inventory.remove('greatesthealthpotion')
+                            healthcap()
+                        else:
+                            print("You don't have greatest health potions!")
 
             hitq = random.randint(1, 10)
             if hitq > 5:
@@ -652,18 +707,16 @@ class battle:
         death()
 
 def random_event_picker():
-    global healthp_amount, inventory, weapon, health
+    global inventory, weapon, health
     wait()
     while True:
         healthcap()
-        healthp_amount = inventory.count('health_potion')
         X = input(f'''
 
 
         Health: {health}
-        Health potions: {healthp_amount}
 
-        Equiped weapon: {weapon}
+        Equiped weapon: {dictitems["weapons"][weapon]['dname']}
 
         Inventory: {inventory}
         Coin amount: {coin}
@@ -676,17 +729,40 @@ def random_event_picker():
         2. Switch equiped weapon\n
 ''')
         if X == '1':
-            health += dictitems['items']['health_potion']['healing']
-            inventory.remove('health_potion')
-            healthcap()
-            print('Consuming one health potion...')
-            time.sleep(1)
+            if 'healthpotion' in inventory or 'greaterhealthpotion' in inventory or 'greatesthealthpotion' in inventory:
+                which_health = input(f'\nHit ENTER to leave\n\n1. Health potion ({inventory.count('healthpotion')})\n2. Greater health potion ({inventory.count('greaterhealthpotion')})\n3. Greatest health potion ({inventory.count('greatesthealthpotion')})\n')
+                if which_health == '1':
+                    if 'healthpotion' in inventory:
+                        health += dictitems['items']['healthpotion']['healing']
+                        inventory.remove('healthpotion')
+                        healthcap()
+                        print('Consuming one health potion...')
+                    else:
+                        print("You don't have health potions!")
+                elif which_health == '2':
+                    if 'greaterhealthpotion' in inventory:
+                        health += dictitems['items']['greaterhealthpotion']['healing']
+                        inventory.remove('greaterhealthpotion')
+                        healthcap()
+                        print('Consuming one health potion...')
+                    else:
+                        print("You don't have greater health potions!")
+                elif which_health == '3':
+                    if 'greatesthealthpotion' in inventory:
+                        health += dictitems['items']['greatesthealthpotion']['healing']
+                        inventory.remove('greatesthealthpotion')
+                        healthcap()
+                        print("Consuming one health potion...")
+                    else:
+                        print("You don't have greatest health potions!")
+                time.sleep(1)
+            else:
+                print("You don't have any health potions!")
         elif X == '2':
-            switched_weapon = input(
-                'What weapon would you like to switch to?\n')
-            if switched_weapon in inventory:
-                inventory.append(weapon)
-                weapon = switched_weapon
+            switched_weapon = input('What weapon would you like to switch to?\n')
+            if switched_weapon in inventory and switched_weapon in dictitems['weapons']:
+                inventory.append(dictitems['weapons'][weapon]['name'])
+                weapon = dictitems['weapons'][switched_weapon]['name']
             else:
                 print("You don't have that weapon.")
         elif not X:
@@ -696,13 +772,12 @@ def random_event_picker():
             pass
             
 def start():
-    global player_stats, name, health, dev_mode_enabled, inventory, weapon, coin, h, swear
+    global player_stats, name, health, dev_mode_enabled, inventory, weapon, coin
     player_stats = {'strength': 0.0, 'constitution': 0.0}
     name = None
     health = 20
-    dev_mode_enabled = False
-    inventory = ["health_potion", "chain_mail"]
-    weapon = 'iron_shortsword'
+    inventory = ["healthpotion"]
+    weapon = 'ironshortsword'
     coin = 0
     print('Hello!')
     time.sleep(.5)
@@ -713,19 +788,14 @@ def start():
     name = input("What will your character's name be?\n")
     if name.lower() == 'dev':
         dev_mode_enabled = True
-    elif name.lower() == 'dez':
-        dev_mode_enabled = True
-        swear = True
+        coin = 100
     print(f"That's not a bad name, {name}!")
     time.sleep(.5)
     print('Well, that is all, let us begin!')
-    if swear:
-        h = 'hell'
     random_event_picker()
 
 def tavern1():
-    tavern_ = tavern()
-    tavern_.enter_tavern()
+    tavern().enter_tavern()
 
 def travling_merchant():
     print('A merchant, with his backpack filled to the brim with items, comes toward you.')
@@ -783,7 +853,7 @@ def back_alley():
 
     if response == '1':
         thug_fight = battle('Thugs', 20, 3, 'strength')
-        print(f'\033[3m{name}\033[0m: As, I said, back the {h.upper()} AWAY!')
+        print(f'\033[3m{name}\033[0m: As, I said, back the HELL AWAY!')
         time.sleep(2)
         thug_fight.fight()
     elif response == '2':
@@ -831,7 +901,7 @@ def town():
     time.sleep(1)
     x = input('Do you wish to enter? (Y/N)\n')
     if x.lower() == 'y':
-        if 'health_potion' not in inventory:
+        if 'healthpotion' not in inventory:
             print(f'\033[3m{name}\033[0m: I do need some health potions...')
         else:
             print(f'\033[3m{name}\033[0m: I do need some things I am sure...')
@@ -860,8 +930,7 @@ def town():
         elif to_do == '2':
             store2.shop_menu()
         elif to_do == '3':
-            taverm_ = tavern()
-            taverm_.enter_tavern()
+            tavern().enter_tavern()
         elif not to_do:
             random_event_picker()
         else:

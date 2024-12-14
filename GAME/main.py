@@ -37,7 +37,7 @@ dictitems = {
             'price': 15
         },
         'greatest_health_potion': {
-            'name': 'greatest)health_potion',
+            'name': 'greatest_health_potion',
             'healing': generate_healing(1, 20),
             'price': 25
         },
@@ -69,6 +69,11 @@ dictitems = {
             'drunk_effective': .25,
             'price': 3
         },
+        'beer': {
+            'name': 'Beer',
+            'drunk_effective': .6,
+            'price': 2
+        }
 
     }
 }
@@ -80,9 +85,11 @@ dev_mode_enabled = False
 inventory = ["health_potion", "chain_mail"]
 weapon = 'iron_shortsword'
 coin = 100
+swear = False
+h = 'heck'
 
 def error_found(to_do: str = 'Report the issue in GitHub!', error_name: str = None):
-    print(f'### ERROR: {error_name} ###')
+    print(f'###~~~--- ERROR: {error_name} ---~~~###')
     print(to_do)
 
 def death():
@@ -235,7 +242,7 @@ class tavern:
             self.name = name
 
         if not item_pool:
-            self.item_pool = self.generate_random_item_pool(dictitems['drinks'])
+            self.item_pool = self.generate_random_item_pool(dictitems['drinks'], exclude='special_drinks')
         else:
             self.item_pool = item_pool
         self.special = None
@@ -244,21 +251,26 @@ class tavern:
         else:
             self.special = special
 
-        self.item1 = random.choice(self.item_pool)
-        self.item2 = random.choice(self.item_pool)
-        self.house_special = random.choice(self.special)
+        if len(self.item_pool) > 0:
+            self.item1 = random.choice(self.item_pool)
+            self.item2 = random.choice(self.item_pool)
+        else:
+            self.item1 = self.item2 = {'name': 'Out of Stock', 'price': 0}
 
-    def generate_random_item_pool(self, category):
+        if len(self.special) > 0:
+            self.house_special = random.choice(self.special)
+        else:
+            self.house_special = {'name': 'Out of Stock', 'price': 0, 'description': 'None available.'}
+
+    def generate_random_item_pool(self, category, exclude=None):
         all_items = []
         for key, value in category.items():
-                if isinstance(value, dict) and 'name' in value:
-                    all_items.append(value)
-                elif isinstance(value, dict):
-                    all_items.extend(v for v in value.values() if isinstance(v, dict) and 'name' in v)
+            if key == exclude:
+                continue
+            if isinstance(value, dict) and 'name' in value:
+                all_items.append(value)
+        return all_items
 
-        if len(all_items) < 2:
-            raise ValueError('ERROR')
-        return random.sample(all_items, k=2)
 
     def enter_tavern(self):
         print('You entered tavern.')
@@ -368,7 +380,7 @@ class tavern:
         1. {self.item1['name']} ({self.item1['price']} coins)
         2. {self.item2['name']} ({self.item2['price']} coins)
 
-        For HOUSE SPECIAL, type HS: {self.house_special['name']} ({self.house_special['price']})
+        For HOUSE SPECIAL, type HS: {self.house_special['name']} ({self.house_special['price']} coins)
 
         {self.house_special['description']}
 
@@ -401,7 +413,7 @@ class tavern:
                     time.sleep(1)
                     print('The last thing you hear before passing out is the bartender.')
                     time.sleep(1)
-                    print(f"{bt}: How the hell do you pass out from bloody wine?")
+                    print(f"{bt}: How the {h} do you pass out from bloody wine?")
                     back_alley()
                 elif self.item1 == 'wine':
                     print('You sip your wine gently, soaking in the flavor and aroma.')
@@ -462,7 +474,7 @@ class tavern:
                 if coin < self.house_special['price']:
                     print(f"{bt}: Hey there, this ain't a charity, you got to have enough money for this liquor here.")
                 else:
-                    drunk_chance = dictitems['drinks']['special_drinks'][self.house_special]['drunk_effective'] - (player_stats['constitution'] / 10)
+                    drunk_chance = self.house_special['drunk_effective'] - (player_stats['constitution'] / 10)
                     random_value = random.random()
                     if random_value < drunk_chance:
                         wasted = True
@@ -684,14 +696,14 @@ def random_event_picker():
             pass
             
 def start():
-    global player_stats, name, health, dev_mode_enabled, inventory, weapon, coin
+    global player_stats, name, health, dev_mode_enabled, inventory, weapon, coin, h, swear
     player_stats = {'strength': 0.0, 'constitution': 0.0}
     name = None
     health = 20
     dev_mode_enabled = False
     inventory = ["health_potion", "chain_mail"]
     weapon = 'iron_shortsword'
-    coin = 100
+    coin = 0
     print('Hello!')
     time.sleep(.5)
     print('Are you ready for an adventure??')
@@ -701,9 +713,14 @@ def start():
     name = input("What will your character's name be?\n")
     if name.lower() == 'dev':
         dev_mode_enabled = True
+    elif name.lower() == 'dez':
+        dev_mode_enabled = True
+        swear = True
     print(f"That's not a bad name, {name}!")
     time.sleep(.5)
     print('Well, that is all, let us begin!')
+    if swear:
+        h = 'hell'
     random_event_picker()
 
 def tavern1():
@@ -739,35 +756,35 @@ def back_alley():
     thug_leader = '\033[3mThug Leader\033[0m'
     wait()
     print('You awaken in a dark alley way.')
-    time.sleep(1)
+    time.sleep(2)
     print('Your head screams and you mouth thirsts.')
-    time.sleep(1)
+    time.sleep(2)
     print('You notice it is night,')
-    time.sleep(1)
+    time.sleep(2)
     print('As you were looking around, you happened to notice a shadow walking toward you...')
-    time.sleep(1)
+    time.sleep(2)
     print(f"{thug_leader}: Hey, you. The sorry looking filth.")
-    time.sleep(1)
+    time.sleep(2)
     print('You notice two other figures behind the masked fellow.')
-    time.sleep(1)
+    time.sleep(2)
     print(f"\033[0m{name}\033[0m: Just get away from me.")
-    time.sleep(1)
+    time.sleep(2)
     print(f'{thug_leader}: Well! Look at the little rascal!')
-    time.sleep(1)
-    print(f'{thug}: Fiesty little rascal, he is.')
-    time.sleep(.5)
-    print('\033[3m"Said on the the figures in the back."\033[0m')
-    time.sleep(1)
+    time.sleep(2)
+    print(f'{thug}: Feisty little rascal, he is.')
+    time.sleep(2)
+    print('\033[3m"Said the figures in the back."\033[0m')
+    time.sleep(2)
     print(f"{thug_leader}: Ok, let's cut to the chase, give us everything you got.")
-    time.sleep(1)
+    time.sleep(2)
     print(f"{thug}: And we mean everything!")
-    time.sleep(1)
+    time.sleep(2)
     response = input('Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n')
 
     if response == '1':
         thug_fight = battle('Thugs', 20, 3, 'strength')
-        print(f'\033[3m{name}\033[0m: As, I said, back the HELL AWAY!')
-        time.sleep(1)
+        print(f'\033[3m{name}\033[0m: As, I said, back the {h.upper()} AWAY!')
+        time.sleep(2)
         thug_fight.fight()
     elif response == '2':
         print(f"\033[3m{name}\033[0m: Fine, fine, yes. I'll give my stuff.")
@@ -778,8 +795,8 @@ def back_alley():
 
         What do you give?\n
         ''')
-            if stuff_given in inventory and stuff_given in dictitems:
-                inventory.remove(stuff_given)
+            if stuff_given.lower() in inventory and stuff_given in dictitems:
+                inventory.remove(stuff_given.lower())
                 print(f'\033[3m"You give the {stuff_given} to the men, they look you up and down."\033[0m')
                 time.sleep(1)
                 print(f"{thug_leader}: Well then, that wasn't too hard now, was it?")
@@ -790,12 +807,11 @@ def back_alley():
                 random_event_picker()
             else:
                 error_found("Try again", "Invalid option")
-                back_alley()
     elif response == '3':
-        inventory.remove(inventory)
+        inventory = []
         print(f"\033[3m{name}\033[0m: OK, OK! Here.")
         time.sleep(1)
-        print('\033[3m"You hand the thugs all your things, they mouths foam with envy. A good haul for them."\033[0m')
+        print('\033[3m"You hand the thugs all your things, their mouths foam with envy. A good haul for them."\033[0m')
         time.sleep(1)
         print(f"{thug_leader}: I knew you'd come to your senses friend!")
         time.sleep(.5)
@@ -807,6 +823,8 @@ def back_alley():
         time.sleep(1)
         print(f'{thug_leader}: Until we meet again...')
         random_event_picker()
+    else:
+        error_found('Try again', 'Invalid option')
 
 def town():
     print('\033[3m"You come across a village, should you enter is the question at hand..."\033[0m')
@@ -822,8 +840,8 @@ def town():
         random_event_picker()
 
     print('\033[3mYou enter the village.\033[0m')
-    store1 = shop("Sasha's Weapons", ['weapon'])
-    store2 = shop("Tintoe's Couldron", ['items'])
+    store1 = shop("Sasha's", ['weapon', 'items'])
+    store2 = shop("Tintoe's General", ['weapons', 'items'])
     time.sleep(1)
     while True:
         to_do = input(f'''

@@ -794,7 +794,7 @@ def start():
     player_stats = {'strength': 0.0, 'constitution': 0.0}
     name = None
     health = 20
-    inventory = ["healthpotion", 'crossbow', 'greaterhealthpotion']
+    inventory = ["healthpotion"]
     weapon = 'ironshortsword'
     coin = 0
     print('Hello!')

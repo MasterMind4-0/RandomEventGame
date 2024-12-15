@@ -129,6 +129,12 @@ def healthcap():
     if health > 20:
         health = 20
 
+def displayinventory():
+    result = ""
+    for item in inventory:
+        result += "        " + item + "\n"
+    return result.strip()
+
 class shop:
     def __init__(self, name: str, categories: list = None, item_pool: list = None):
         self.name: str = name
@@ -727,7 +733,10 @@ def random_event_picker():
 
         Equiped weapon: {dictitems["weapons"][weapon]['dname']}
 
-        Inventory: {inventory}
+        Inventory:
+        
+        {displayinventory()}
+        
         Coin amount: {coin}
 
         Actions:
@@ -785,7 +794,7 @@ def start():
     player_stats = {'strength': 0.0, 'constitution': 0.0}
     name = None
     health = 20
-    inventory = ["healthpotion"]
+    inventory = ["healthpotion", 'crossbow', 'greaterhealthpotion']
     weapon = 'ironshortsword'
     coin = 0
     print('Hello!')

@@ -97,8 +97,13 @@ inventory = ["healthpotion"]
 weapon = 'ironshortsword'
 coin = 0
 
-def sfix(str_to_be_fixed: str):
-    str_to_be_fixed = str_to_be_fixed.lower()
+def sfix(str_to_be_fixed):
+    if type(str_to_be_fixed) == str:
+        str_to_be_fixed = str_to_be_fixed.lower()       
+    elif type(str_to_be_fixed) == int:
+        pass
+    else:
+        return 'ERROR'
     str_to_be_fixed = str_to_be_fixed.replace(' ', '')
     return str_to_be_fixed
 
@@ -220,7 +225,7 @@ class shop:
                 elif bought_item == '3' and coin >= self.item3['price']:
                     traded = True
                     coin -= self.item3['price']
-                    inventory.append(self.item2['name'])
+                    inventory.append(self.item3['name'])
                     print(f'You bought a {self.item3["dname"]}!')
                     time.sleep(1)
                     print(f'You now have {coin} coins left.')
@@ -305,7 +310,7 @@ class tavern:
 
     def enter_tavern(self):
         print('You entered tavern.')
-        time.sleep(2)
+        time.sleep(1)
         print('As you enter, the whiff of alcohol and sweat fills your nose,')
         time.sleep(1)
         print('\033[3mBartender\033[0m: Welcome!')
@@ -564,6 +569,8 @@ class battle:
         if not reward_gold:
             self.reward_gold = attackers_health * .4
             self.reward_gold = round(self.reward_gold)
+        elif reward_gold == 'ng':
+            self.reward_gold = 0
         else:
             self.reward_gold: int = reward_gold
 
@@ -784,7 +791,7 @@ def random_event_picker():
             else:
                 print("You don't have that weapon.")
         elif not X:
-            events = [travling_merchant, tavern1, kidnappers, town]
+            events = [travling_merchant, tavern1, kidnappers, town, farmer_problem]
             random.choice(events)()
         else:
             pass
@@ -804,7 +811,7 @@ def start():
     print('Yeah, I thought you were.')
     print("Ok, first, let's create your character:")
     name = input("What will your character's name be?\n")
-    if name.lower() == 'dev':
+    if sfix(name) == 'dev':
         dev_mode_enabled = True
         coin = 100
     print(f"That's not a bad name, {name}!")
@@ -955,4 +962,74 @@ def town():
             error_found("Try again", "Invalid")
             time.sleep(1)
 
+def farmer_problem():
+    global coin, player_stats, dev_mode_enabled
+    fr = '\033[3mFarmer\033[0m'
+
+    print('During your journey, you come across a farmer in a small town you are passing through.')
+    time.sleep(2)
+    print('He begs for your help,')
+    time.sleep(1)
+    print(f"{fr}: Please! Every night something eats my crops! I beg, everyone has regected, but can you help me?")
+    time.sleep(2)
+    helpquest = input('Should you help the man? (Y/N)\n')
+    if sfix(helpquest) == 'y':
+        print(f"{name}: Well, I don't see why not.")
+        time.sleep(1)
+        print('The man graciously thanks you.')
+        time.sleep(1)
+        print(f"{fr}: Every night my berries always seem to be gone! Do you think you can stay overnight and discover what beast eats my berries?")
+        time.sleep(3)
+        print('You accept and, at night, after waiting for hours, you finally spot the thief.')
+        time.sleep(2)
+        print('A bear. And a large one at that.')
+        time.sleep(1)
+        choice_bear = input('Should you fight the bear, try to tame the bear, or should you leave it be? (1, 2, or 3)\n')
+        if sfix(choice_bear) == '1':
+            print('You charge the bear, frightening it.')
+            time.sleep(1)
+            battle('Bear', 25, 3, 'strength', 'ng').fight()
+        elif sfix(choice_bear) == '2':
+            print(f'{name}: Woah! Easier there.')
+            time.sleep(1)
+            print('The bear seems to stare at you,')
+            time.sleep(1)
+            print('You reach out your hand.')
+            time.sleep(1)
+            tame_chance = .25
+            random_value = random.random()
+            if random_value < tame_chance:
+                if dev_mode_enabled:
+                    print(f"tame chance: {tame_chance}\ncompared value: {random_value}")
+                print('As you reach out, however, the bear turns aggresive and lashes out at you.')
+                time.sleep(2)
+                battle('Bear', 25, 3, 'strength', 'ng').fight()
+                coin += 5
+                print("In the morning, the man is overjoyed to hear you've gotten rid of the pest problem.")
+                time.sleep(2)
+                print('He gives you his gold and thanks you for your work.')
+                random_event_picker()
+            else:
+                coin += 7
+                if dev_mode_enabled:
+                    print(f"drunk chance: {tame_chance}\ncompared value: {random_value}")
+                print('The bar cautiously walks towards you.')
+                time.sleep(1)
+                print('It nozzles its nose against your hand.')
+                time.sleep(1)
+                print('In the morning, you show the farmer how to take care of the bear.')
+                time.sleep(2)
+                print('You even train it to pick the berries for the farmer.')
+                time.sleep(2)
+                print('As the farmer gives you your award, you leave to continue your travels.')
+                random_event_picker()
+        else:
+            print('You look at the large bear, and decide on leaving it be.')
+            time.sleep(1)
+            print('You slip away under the cover of the night.')
+            random_event_picker()
+
+    else:
+        print(f'{name}: Sorry, but I have too much to do, deal with it yourself.')
+        random_event_picker()
 start()

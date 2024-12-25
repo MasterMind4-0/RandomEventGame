@@ -984,6 +984,17 @@ def farmer_problem():
         time.sleep(2)
         print('A bear. And a large one at that.')
         time.sleep(1)
+        scared_chance = .2
+        random_value = random.random()
+        if random_value < scared_chance:
+            if dev_mode_enabled:
+                print(f"scared chance: {scared_chance}\ncompared value: {random_value}")
+            print('As you see the bear, you feel a sense of fear.')
+            time.sleep(1)
+            print('The bear stands on its hind legs, you fall backwards in fear.')
+            time.sleep(1)
+            print('You dash before the bear dos anything else.')
+            random_event_picker()
         choice_bear = input('Should you fight the bear, try to tame the bear, or should you leave it be? (1, 2, or 3)\n')
         if sfix(choice_bear) == '1':
             print('You charge the bear, frightening it.')
@@ -1012,7 +1023,7 @@ def farmer_problem():
             else:
                 coin += 7
                 if dev_mode_enabled:
-                    print(f"drunk chance: {tame_chance}\ncompared value: {random_value}")
+                    print(f"tame chance: {tame_chance}\ncompared value: {random_value}")
                 print('The bar cautiously walks towards you.')
                 time.sleep(1)
                 print('It nozzles its nose against your hand.')

@@ -1,0 +1,147 @@
+{
+    "armors": {
+        "noarmor": {
+            "name": "noarmor",
+            "dname": "No Armor",
+            "Armor": 0,
+            "price": 0,
+            "sellable": false,
+            "InShop": false
+        },
+        "ironarmor": {
+            "name": "ironarmor",
+            "dname": "Iron Armor",
+            "Armor": 5,
+            "price": 30,
+            "sellable": true,
+            "InShop": true
+        },
+        "leatherarmor": {
+            "name": "leatherarmor",
+            "dname": "Leather Armor",
+            "Armor": 3,
+            "price": 15,
+            "sellable": true,
+            "InShop": true
+        },
+        "hood": {
+            "name": "hood",
+            "dname": "Hood",
+            "Armor": 0.5,
+            "price": 10,
+            "sellable": true,
+            "InShop": true
+        }
+    },
+    "weapons": {
+        "ironshortsword": {
+            "name": "ironshortsword",
+            "dname": "Iron Shortsword",
+            "Damage": 2,
+            "price": 15,
+            "sellable": true,
+            "InShop": true
+        },
+        "ironlongsword": {
+            "name": "ironlongsword",
+            "dname": "Iron Longsword",
+            "Damage": 5,
+            "price": 30,
+            "sellable": true,
+            "InShop": true
+        },
+        "crossbow": {
+            "name": "crossbow",
+            "dname": "Crossbow",
+            "Damage": 3,
+            "price": 15,
+            "sellable": true,
+            "InShop": true
+        },
+        "dagger": {
+            "name": "dagger",
+            "dname": "Dagger",
+            "Damage": 1,
+            "price": 8,
+            "sellable": true,
+            "InShop": true
+        }
+    },
+    "items": {
+        "healthpotion": {
+            "name": "healthpotion",
+            "dname": "Health Potion",
+            "min": 1,
+            "max": 5,
+            "price": 5,
+            "sellable": true,
+            "InShop": true
+        },
+        "greaterhealthpotion": {
+            "name": "greaterhealthpotion",
+            "dname": "Greater health potion",
+            "min": 1,
+            "man": 10,
+            "price": 15,
+            "sellable": true,
+            "InShop": true
+        },
+        "greatesthealthpotion": {
+            "name": "greatesthealthpotion",
+            "dname": "Greatest health potion",
+            "min": 1,
+            "max": 20,
+            "price": 25,
+            "sellable": true,
+            "InShop": true
+        }
+    },
+    "drinks": {
+        "special_drinks": {
+            "dragonsblood": {
+                "name": "dragonsblood",
+                "dname": "Dragon's Blood",
+                "description": "This ale is dark and thick. It's a little bitter with a smokey after taste, an acquired taste for many. The bartender warns you that this drink will certainly leave you wasted.",
+                "drunk_effective": 0.85,
+                "exp": 0.02,
+                "price": 6,
+                "sellable": false,
+                "InShop": false
+            },
+            "goblinvomit": {
+                "name": "goblinvomit",
+                "dname": "Goblin Vomit",
+                "description": "This dark green that reminds many of goblin vomit. It's surprising thin, for its name, but why many avoid it is because of its horrid bitter taste.",
+                "drunk_effective": 0.90,
+                "exp": 0.03,
+                "price": 5,
+                "sellable": false,
+                "InShop": false
+            }
+        },
+        "rum": {
+            "name": "rum",
+            "dname": "Rum",
+            "drunk_effective": 0.7,
+            "price": 2,
+            "sellable": false,
+            "InShop": false
+        },
+        "wine": {
+            "name": "wine",
+            "dname": "Wine",
+            "drunk_effective": 0.25,
+            "price": 3,
+            "sellable": false,
+            "InShop": false
+        },
+        "beer": {
+            "name": "beer",
+            "dname": "Beer",
+            "drunk_effective": 0.6,
+            "price": 2,
+            "sellable": false,
+            "InShop": false
+        }
+    }
+}

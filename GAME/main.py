@@ -1,101 +1,38 @@
 import time
 import random
+import json
+from Game_Data.colors import colors
 
+def error_found(to_do: str = 'Report the issue in GitHub!', error_name: str = None):
+    if not error_name:
+        print(f'{colors.YELLOW}###~~~--- ERROR ---~~~###{colors.ENDC}')
+    else:
+        print(f'{colors.YELLOW}###~~~--- ERROR: {error_name.upper()} ---~~~###{colors.ENDC}')
+    print(f"{colors.YELLOW}###~~~--- {to_do.upper()} ---~~~###{colors.ENDC}")
 
 def generate_healing(x: int, y: int):
     healing = random.randint(x, y)
     return healing
 
-
-dictitems = {
-    'weapons': {
-        'ironshortsword': {
-            'name': 'ironshortsword',
-            'dname': 'Iron Shortsword',
-            'Damage': 2,
-            'price': 15
-        },
-        'crossbow': {
-            'name': 'crossbow',
-            'dname': 'Crossbow',
-            'Damage': 3,
-            'price': 15
-        },
-        'dagger': {
-            'name': 'dagger',
-            'dname': 'Dagger',
-            'Damage': 1,
-            'price': 8
-        }
-    },
-    'items': {
-        'healthpotion': {
-            'name': 'healthpotion',
-            'dname': 'Health Potion',
-            'healing': generate_healing(1, 5),
-            'price': 5
-        },
-        'greaterhealthpotion': {
-            'name': 'greaterhealthpotion',
-            'dname': 'Greater health potion',
-            'healing': generate_healing(1, 10),
-            'price': 15
-        },
-        'greatesthealthpotion': {
-            'name': 'greatesthealthpotion',
-            'dname': 'Greatest health potion',
-            'healing': generate_healing(1, 20),
-            'price': 25
-        },
-    },
-    'drinks': {
-        'special_drinks': {
-            'dragonsblood': {
-                'name': 'dragonsblood',
-                'dname': "Dragon's Blood",
-                'description': "This ale is dark and thick. It's a little bitter with a smokey after taste, an acquired taste for many. The bartender warns you that this drink will certainly leave you wasted.",
-                'drunk_effective': .85,
-                'exp': .02,
-                'price': 6
-            },
-            'goblinvomit': {
-                'name': 'goblinvomit',
-                'dname': 'Goblin Vomit',
-                'description': "This dark green that reminds many of goblin vomit. It's surprising thin, for its name, but why many avoid it is because of its horrid bitter taste.",
-                'drunk_effective': .90,
-                'exp': .03,
-                'price': 5
-            }
-        },
-        'rum': {
-            'name': 'rum',
-            'dname': 'Rum',
-            'drunk_effective': .7,
-            'price': 2
-        },
-        'wine': {
-            'name': 'wine',
-            'dname': 'Wine',
-            'drunk_effective': .25,
-            'price': 3
-        },
-        'beer': {
-            'name': 'beer',
-            'dname': 'Beer',
-            'drunk_effective': .6,
-            'price': 2
-        }
-
-    }
-}
+try:
+    with open('GAME/Game_Data/items.json', 'r') as f:
+        dictitems = json.load(f)
+except FileNotFoundError or json.JSONDecodeError as e:
+    error_found('There was an error loading the items database.', e)
 
 player_stats = {'strength': 0.0, 'constitution': 0.0}
-name = None
-health = 20
+name = 'DEV'
+player_health = 20
 dev_mode_enabled = False
-inventory = ["healthpotion"]
-weapon = 'ironshortsword'
-coin = 0
+inventory = ["greatesthealthpotion", "greatesthealthpotion", "crossbow"]
+player_weapon = 'ironlongsword'
+player_armor = 'ironarmor'
+coin = 100
+
+def determine_armor(armor: str):
+    if type(armor) is int:
+        return armor
+    return dictitems['armors'][armor]['Armor']
 
 def sfix(str_to_be_fixed):
     if type(str_to_be_fixed) == str:
@@ -106,13 +43,6 @@ def sfix(str_to_be_fixed):
         return 'ERROR'
     str_to_be_fixed = str_to_be_fixed.replace(' ', '')
     return str_to_be_fixed
-
-def error_found(to_do: str = 'Report the issue in GitHub!', error_name: str = None):
-    if not error_name:
-        print('###~~~--- ERROR ---~~~###')
-    else:
-        print(f'###~~~--- ERROR: {error_name} ---~~~###')
-    print(to_do)
 
 def death():
     print('You died!')
@@ -130,57 +60,64 @@ def wait():
         time.sleep(1)
 
 def healthcap():
-    global health
-    if health > 20:
-        health = 20
+    global player_health
+    if player_health > 20:
+        player_health = 20
 
 def displayinventory():
-    result = ""
+    item_counts = {}
     for item in inventory:
-        result += "        " + item + "\n"
+        if item in item_counts:
+            item_counts[item] += 1
+        else:
+            item_counts[item] = 1
+
+    result = ""
+    for item, count in item_counts.items():
+        for category, items in dictitems.items():
+            if item in items:
+                dname = items[item]['dname']
+                break
+        if count > 1:
+            result += f"            {dname} x{count}\n"
+        else:
+            result += f"            {dname}\n"
     return result.strip()
 
 class shop:
-    def __init__(self, name: str, categories: list = None, item_pool: list = None):
+    def __init__(self, name: str, trader_name: str = 'Trader', item_pool: list = None):
         self.name: str = name
+        self.trader_name = trader_name
 
         if item_pool:
             self.item_pool = item_pool
         else:
-            self.item_pool = self.generate_random_item_pool(categories)
+            self.item_pool = self.generate_random_item_pool()
 
-        self.item1 = random.choice(self.item_pool)
-        self.item2 = random.choice(self.item_pool)
-        self.item3 = random.choice(self.item_pool)
+        self.item1, self.item2, self.item3 = self.select_unique_items()
 
-    def generate_random_item_pool(self, categories = None):
-        allowed_categories = categories if categories else ['weapons', 'items']
+    def generate_random_item_pool(self):
+        allowed_items = []
 
-        weapon_items = dictitems['weapons'].values() if 'weapons' in allowed_categories else []
-        item_items = dictitems['items'].values() if 'items' in allowed_categories else []
+        for category, items in dictitems.items():
+            for item, properties in items.items():
+                if properties.get("InShop") is True:
+                    allowed_items.append(properties)
 
-        if len(weapon_items) + len(item_items) < 3:
+        if len(allowed_items) < 3:
             raise ValueError("Not enough items to populate the shop.")
 
-        selected_items = []
-        if weapon_items:
-            selected_items.append(random.choice(list(weapon_items)))
-        if item_items:
-            selected_items.append(random.choice(list(item_items)))
+        return allowed_items
 
-        remaining_pool = list(weapon_items) + list(item_items)
-        while len(selected_items) < 3:
-            random_item = random.choice(remaining_pool)
-            if random_item not in selected_items:
-                selected_items.append(random_item)
-
-        return selected_items
+    def select_unique_items(self):
+        selected_items = random.sample(self.item_pool, 3)
+        return selected_items[0], selected_items[1], selected_items[2]
 
     def shop_menu(self):
         global coin, inventory
         traded = False
         trader_prompts = ['What can I do you for?', 'What will it be today?', 'Anything catching your eye?', "Don't bargin, I am not going to give in.", "I don't do sales."]
-        tr = '\033[3mTrader\033[0m'
+        tr = f'\033[3m{self.trader_name}\033[0m'
 
         while True:
             trader_prompt = random.choice(trader_prompts)
@@ -193,67 +130,88 @@ class shop:
 
         Coin: {coin}
 
-        Inventory: {inventory}
+        Inventory: 
+            {displayinventory()}
 
         Hit ENTER to leave.
 
-        1. Buy items
-        2. Sell items\n
+        1, 2, 3. To buy corresponding items
+        4. Sell items\n
         ''')
-            t = input('')
-            if t == '1':
-                print(f'{tr}: {trader_prompt}')
-                time.sleep(1)
-                bought_item = input('What would you like to buy? (1, 2, or 3?)\n')
 
-                if bought_item == '1' and coin >= self.item1['price']:
-                    traded = True
+            t = input("Choose an option: ")
+
+            if t == '1':
+                if coin >= self.item1['price']:
                     coin -= self.item1['price']
                     inventory.append(self.item1['name'])
                     print(f'You bought a {self.item1["dname"]}!')
                     time.sleep(1)
                     print(f'You now have {coin} coins left.')
+                else:
+                    print('You do not have enough money to buy that item.')
 
-                elif bought_item == '2' and coin >= self.item2['price']:
-                    traded = True
+            elif t == '2':
+                if coin >= self.item2['price']:
                     coin -= self.item2['price']
                     inventory.append(self.item2['name'])
                     print(f'You bought a {self.item2["dname"]}!')
                     time.sleep(1)
                     print(f'You now have {coin} coins left.')
+                else:
+                    print('You do not have enough money to buy that item.')
 
-                elif bought_item == '3' and coin >= self.item3['price']:
-                    traded = True
+            elif t == '3':
+                if coin >= self.item3['price']:
                     coin -= self.item3['price']
                     inventory.append(self.item3['name'])
                     print(f'You bought a {self.item3["dname"]}!')
                     time.sleep(1)
                     print(f'You now have {coin} coins left.')
-
                 else:
                     print('You do not have enough money to buy that item.')
 
-            elif t == '2':
+            elif t == '4':
+                invalid_items = []
+                for category, items in dictitems.items():
+                    for item, properties in items.items():
+                        if properties.get("sellable") is False:
+                            invalid_items.append(item)
+
+                inventory_dict = {str(idx): item for idx, item in enumerate(inventory, start=1)}
+                
+                dinventory = []
+
+                for idx, item in inventory_dict.items():
+                    for category, items in dictitems.items():
+                        if item in items:
+                            dinventory.append(f"{idx}. {item} (+{dictitems[category][item]['price'] // 2} coins)")
+                            break
+                
+                dinventory_str = "\n            ".join(dinventory)
+                
                 sell = input(f'''
+        
         Selling
 
-        Inventory: {inventory}
+        Inventory:
+            {dinventory_str}
 
-        Type the name of the item you'd like to sell\n
+        Enter the number of the item you'd like to sell\n
         ''')
-                sell = sfix(sell)
 
-                if sell in inventory:
+                sell_item = inventory_dict.get(sell)
+                if sell_item and sell_item not in invalid_items:
                     traded = True
                     item_found = False
                     for items in dictitems.values():
-                        if sell in items:
-                            item = items[sell]
+                        if sell_item in items:
+                            item = items[sell_item]
                             original_price = item['price']
                             selling_price = original_price // 2
 
                             coin += selling_price
-                            inventory.remove(sell)
+                            inventory.remove(sell_item)
                             print(f"You sold {item['dname']} for {selling_price} coins.")
                             item_found = True
                             break
@@ -261,15 +219,20 @@ class shop:
                     if not item_found:
                         error_found("Try again", "Item not found in shop database")
                 else:
-                    error_found(error_name="You don't have that item")
+                    if not sell_item:
+                        error_found("Try again", "Invalid item number")
+                    elif sell_item in invalid_items:
+                        error_found("Sell another item", "That item cannot be sold")
 
-            elif not t:
+            elif t == '5':
                 if traded:
                     print('The trader waves goodbye as you leave.')
-                    random_event_picker()
                 else:
-                    print('You leave as the trader sighs.')
-                    random_event_picker()
+                    print('You decide not to trade and leave the shop.')
+                break
+
+            else:
+                error_found("Try again", "Invalid option")
 
 class tavern:
     def __init__(self, special: str = None, item_pool: list = None, name: str = None):
@@ -334,7 +297,7 @@ class tavern:
             print('\033[3m"Nope, not today."\033[0m')
             time.sleep(2)
             print('You turn around and walk straight out.')
-            random_event_picker()
+            return
 
     def return_tavern(self):
         Choice = input('Walk to the bartender or talk to some folk (1 or 2? L for leave.)\n')
@@ -355,7 +318,7 @@ class tavern:
             print('\033[3m"I have had enough."\033[0m')
             time.sleep(2)
             print('You turn around and walk straight out.')
-            random_event_picker()
+            return
             
     def bartalk(self):
         namelist = ['Sophia', 'Timmy', 'Alex', 'Steve', 'Boldimore']
@@ -555,11 +518,11 @@ class tavern:
                 pass
 
 class battle:
-
-    def __init__(self, attackers_name: str, attackers_health: int, attackers_damage: int, type_exp: str, reward_gold: int = None, reward_item: str = None):
+    def __init__(self, attackers_name: str, attackers_health: int, attackers_damage: int, type_exp: str, reward_gold: int = None, reward_item: str = None, attackers_armor = 0):
         self.attackers_name: str = attackers_name
         self.attackers_health: int = attackers_health
         self.attackers_damage: int = attackers_damage
+        self.attackers_armor: int = attackers_armor
         self.exp: float = self.attackers_health * .02
         self.type_exp: str = type_exp
         if not reward_item:
@@ -575,7 +538,7 @@ class battle:
             self.reward_gold: int = reward_gold
 
     def fight(self):
-        global health, inventory, weapon, coin, player_stats
+        global player_health, inventory, player_weapon, coin, player_stats
 
         if dev_mode_enabled:
             sim_question = input('Would you prefer to simulate a battle instead? (Y/N)\n')
@@ -583,95 +546,110 @@ class battle:
                 self.simulate_fight()
                 return
 
-        while health > 0:
+        while player_health > 0:
             if self.attackers_health <= 0:
-                player_stats[self.type_exp] += self.exp
-                print("You won the fight!")
-                if self.reward_item:
-                    inventory.append(self.reward_item)
-                    print(f'You are awarded with a {self.reward_item}!')
-                if self.reward_gold:
-                    coin += self.reward_gold
-                    print(f"You are awarded with {self.reward_gold} coins!")
-                return
+                self.handle_victory()
+                break
 
             time.sleep(1)
+            action = self.get_player_action()
 
-            X = input(f"""
-        Your health: {health}
+            if action == '1':
+                self.use_health_potion()
+            elif action == '2':
+                self.switch_weapon()
+            elif not action:
+                self.perform_attack()
+            else:
+                print("Invalid action. Please try again.")
+        if player_health <= 0:
+            death()
 
-        Inventory: {inventory}
-        Weapon: {dictitems["weapons"][weapon]['dname']}
+    def handle_victory(self):
+        global player_stats, inventory, coin
+        player_stats[self.type_exp] += self.exp
+        print("You won the fight!")
+        if self.reward_item:
+            inventory.append(self.reward_item)
+            print(f'You are awarded with a {self.reward_item}!')
+        if self.reward_gold:
+            coin += self.reward_gold
+            print(f"You are awarded with {colors.YELLOW}{self.reward_gold}{colors.ENDC} coins!")
+
+    def get_player_action(self):
+        return input(f"""
+        {colors.RED}Your health: {player_health}{colors.ENDC}
+
+        {colors.BLUE}Equiped Weapon: {dictitems["weapons"][player_weapon]['dname']}
+        Equiped Armor: {dictitems['armors'][player_armor]['dname']}{colors.ENDC}
 
         Actions:
 
         Hit ENTER to continue the battle
 
-        1. Take health potion (You have {inventory.count('healthpotion') + inventory.count('greaterhealthpotion') + inventory.count('greatesthealthpotion')})
-        2. Switch equiped weapon\n
+        1. Take health potion (You have {colors.GREEN}{inventory.count('healthpotion') + inventory.count('greaterhealthpotion') + inventory.count('greatesthealthpotion')}{colors.ENDC})
+        2. Switch equipped weapon\n
 """)
 
-            if X.lower() == '1':
-                if 'healthpotion' in inventory or 'greaterhealthpotion' in inventory or 'greatesthealthpotion' in inventory:
-                    which_health = input(f'\nHit ENTER to leave\n\n1. Health potion ({inventory.count('healthpotion')})\n2. Greater health potion ({inventory.count('greaterhealthpotion')})\n3. Greatest health potion ({inventory.count('greatesthealthpotion')})\n')
-                    if which_health == '1':
-                        if 'healthpotion' in inventory:
-                            health += dictitems['items']['healthpotion']['healing']
-                            inventory.remove('healthpotion')
-                            healthcap()
-                            print('Consuming one health potion...')
-                        else:
-                            print("You don't have health potions!")
-                    elif which_health == '2':
-                        if 'greaterhealthpotion' in inventory:
-                            health += dictitems['items']['greaterhealthpotion']['healing']
-                            inventory.remove('greaterhealthpotion')
-                            healthcap()
-                            print('Consuming one health potion...')
-                        else:
-                            print("You don't have greater health potions!")
-                    elif which_health == '3':
-                        if 'greatesthealthpotion' in inventory:
-                            health += dictitems['items']['greatesthealthpotion']['healing']
-                            inventory.remove('greatesthealthpotion')
-                            healthcap()
-                            print("Consuming one health potion...")
-                        else:
-                            print("You don't have greatest health potions!")
-                    time.sleep(1)
-                else:
-                    print("You don't have any health potions!")
-            elif X.lower() == '2':
-                switched_weapon = input(
-                    'What weapon would you like to switch to?\n')
-                switched_weapon = switched_weapon.strip().lower()
-                if switched_weapon in inventory:
-                    inventory.append(weapon)
-                    weapon = switched_weapon
-                else:
-                    print("You don't have that weapon.")
-            elif not X:
-                print(f"The {self.attackers_name} charges towards you,")
-                time.sleep(.5)
-                hitq = random.randint(1, 10)
-                if hitq > 5:
-                    self.attackers_health -= dictitems['weapons'][weapon]['Damage']
-                    print(f"The {self.attackers_name} missed! Giving you the opportunity to attack!")
-                    time.sleep(1)
-                    if dev_mode_enabled:
-                        print(f"The {self.attackers_name} has {self.attackers_health} left!")
-                else:
-                    health -= self.attackers_damage
-                    print(f"The {self.attackers_name} hit you!")
-                    time.sleep(.5)
-                    print(f"You have {health} health left!")
+    def use_health_potion(self):
+        if 'healthpotion' in inventory or 'greaterhealthpotion' in inventory or 'greatesthealthpotion' in inventory:
+            which_health = input(f'\nHit ENTER to leave\n\n1. Health potion ({inventory.count('healthpotion')})\n2. Greater health potion ({inventory.count('greaterhealthpotion')})\n3. Greatest health potion ({inventory.count('greatesthealthpotion')})\n')
+            if which_health == '1' and 'healthpotion' in inventory:
+                self.consume_potion('healthpotion')
+            elif which_health == '2' and 'greaterhealthpotion' in inventory:
+                self.consume_potion('greaterhealthpotion')
+            elif which_health == '3' and 'greatesthealthpotion' in inventory:
+                self.consume_potion('greatesthealthpotion')
             else:
-                pass
+                print("You don't have that potion!")
+        else:
+            print("You don't have any health potions!")
+        time.sleep(1)
 
-        death()
+    def consume_potion(self, potion_type):
+        global player_health, inventory
+        player_health += generate_healing(dictitems['items'][potion_type]['min'], dictitems['items'][potion_type]['max'])
+        inventory.remove(potion_type)
+        healthcap()
+        print(f'Consuming one {dictitems['items'][potion_type]['dname']}...')
+
+    def switch_weapon(self):
+        global player_weapon, inventory
+        switched_weapon = input('What weapon would you like to switch to?\n')
+        if switched_weapon in inventory and switched_weapon in dictitems['weapons']:
+            inventory.append(dictitems['weapons'][player_weapon]['name'])
+            player_weapon = dictitems['weapons'][switched_weapon]['name']
+        else:
+            print("You don't have that weapon.")
+
+    def perform_attack(self):
+        global player_health
+        print(f"The {self.attackers_name} charges towards you,")
+        time.sleep(.5)
+        if self.calculate_hit_chance(determine_armor(self.attackers_armor)):
+            self.attackers_health -= dictitems['weapons'][player_weapon]['Damage']
+            print(f"The {self.attackers_name} missed! Giving you the opportunity to attack!")
+            time.sleep(.5)
+            if dev_mode_enabled:
+                print(f"The {self.attackers_name} has {self.attackers_health} left!")
+        else:
+            if player_armor:
+                player_health -= self.attackers_damage - (0.2 * determine_armor(player_armor))
+                player_health = round(player_health)
+                print(f"The {self.attackers_name} hit you!")
+                time.sleep(.5)
+                print(f"You have {player_health} health left!")
+
+    def calculate_hit_chance(self, armor):
+        random_value = random.random()
+        base_hit_chance = .5
+        hit_chance = base_hit_chance - (armor * .02)
+        if dev_mode_enabled:
+            print(f"Hit chance: {hit_chance}\nArmor: {self.attackers_armor}\nBase hit chance: {base_hit_chance}\nHit chance {hit_chance} < compared value {random_value} {hit_chance < random_value}")
+        return random_value < hit_chance
 
     def simulate_fight(self):
-        global health, inventory, weapon, coin, player_stats
+        global player_health, inventory, player_weapon, coin, player_stats
         health_point = input('What should health be before you take a health potion?\n')
         reward_yes = input('Receive rewards? (Y/N)\n')
         if health_point:
@@ -680,7 +658,7 @@ class battle:
             health_point = 6
         reward_yes = sfix(reward_yes) == 'y'
 
-        while health > 0:
+        while player_health > 0:
 
             if self.attackers_health <= 0:
                 player_stats[self.type_exp] += self.exp
@@ -691,60 +669,59 @@ class battle:
                 if self.reward_gold and reward_yes:
                     coin += self.reward_gold
                     print(f"You are awarded with {self.reward_gold} coins!")
-                return
+                break
 
-            if health <= round(int(health_point)):
+            if player_health <= round(int(health_point)):
                 if 'healthpotion' in inventory or 'greaterhealthpotion' in inventory or 'greatesthealthpotion' in inventory:
-                    which_health = input(f'health: {health}\n\nHit ENTER to leave\n\n1. Health potion ({inventory.count('healthpotion')})\n2. Greater health potion ({inventory.count('greaterhealthpotion')})\n3. Greatest health potion ({inventory.count('greatesthealthpotion')})\n')
+                    which_health = input(f'health: {player_health}\n\nHit ENTER to leave\n\n1. Health potion ({inventory.count('healthpotion')})\n2. Greater health potion ({inventory.count('greaterhealthpotion')})\n3. Greatest health potion ({inventory.count('greatesthealthpotion')})\n')
                     if which_health == '1':
                         if 'healthpotion' in inventory:
-                            health += dictitems['items']['healthpotion']['healing']
+                            player_health += generate_healing(dictitems['items']['healthpotion']['min'], dictitems['items']['healthpotion']['max'])
                             inventory.remove('healthpotion')
                             healthcap()
                         else:
                             print("You don't have health potions!")
                     elif which_health == '2':
                         if 'greaterhealthpotion' in inventory:
-                            health += dictitems['items']['greaterhealthpotion']['healing']
+                            player_health += generate_healing(dictitems['items']['greaterhealthpotion']['min'], dictitems['items']['greaterhealthpotion']['max'])
                             inventory.remove('greaterhealthpotion')
                             healthcap()
                         else:
                             print("You don't have greater health potions!")
                     elif which_health == '3':
                         if 'greatesthealthpotion' in inventory:
-                            health += dictitems['items']['greatesthealthpotion']['healing']
+                            player_health += generate_healing(dictitems['items']['greatesthealthpotion']['min'], dictitems['items']['greatesthealthpotion']['max'])
                             inventory.remove('greatesthealthpotion')
                             healthcap()
                         else:
                             print("You don't have greatest health potions!")
 
-            hitq = random.randint(1, 10)
-            if hitq > 5:
-                self.attackers_health -= dictitems['weapons'][weapon]['Damage']
+            if self.calculate_hit_chance(determine_armor(self.attackers_armor)):
+                self.attackers_health -= dictitems['weapons'][player_weapon]['Damage']
             else:
-                health -= self.attackers_damage
+                player_health -= self.attackers_damage
         else:
             pass
-
-        death()
+        if player_health <= 0:
+            death()
 
 def random_event_picker():
-    global inventory, weapon, health
+    global inventory, player_weapon, player_health
     wait()
     while True:
         healthcap()
         X = input(f'''
 
 
-        Health: {health}
+        Health: {colors.RED}{player_health}{colors.ENDC}
 
-        Equiped weapon: {dictitems["weapons"][weapon]['dname']}
+        Equiped weapon: {dictitems["weapons"][player_weapon]['dname']}
+        Equiped armor: {dictitems['armors'][player_armor]['dname']}
 
         Inventory:
+            {displayinventory()}
         
-        {displayinventory()}
-        
-        Coin amount: {coin}
+        Coin amount: {colors.YELLOW}{coin}{colors.ENDC}
 
         Actions:
 
@@ -758,7 +735,7 @@ def random_event_picker():
                 which_health = input(f'\nHit ENTER to leave\n\n1. Health potion ({inventory.count('healthpotion')})\n2. Greater health potion ({inventory.count('greaterhealthpotion')})\n3. Greatest health potion ({inventory.count('greatesthealthpotion')})\n')
                 if which_health == '1':
                     if 'healthpotion' in inventory:
-                        health += dictitems['items']['healthpotion']['healing']
+                        player_health += generate_healing(dictitems['items']['healthpotion']['min'], dictitems['items']['healthpotion']['max'])
                         inventory.remove('healthpotion')
                         healthcap()
                         print('Consuming one health potion...')
@@ -766,54 +743,57 @@ def random_event_picker():
                         print("You don't have health potions!")
                 elif which_health == '2':
                     if 'greaterhealthpotion' in inventory:
-                        health += dictitems['items']['greaterhealthpotion']['healing']
+                        player_health += generate_healing(dictitems['items']['greaterhealthpotion']['min'], dictitems['items']['greaterhealthpotion']['max'])
                         inventory.remove('greaterhealthpotion')
                         healthcap()
-                        print('Consuming one health potion...')
+                        print('Consuming one greater health potion...')
                     else:
                         print("You don't have greater health potions!")
                 elif which_health == '3':
                     if 'greatesthealthpotion' in inventory:
-                        health += dictitems['items']['greatesthealthpotion']['healing']
+                        player_health += generate_healing(dictitems['items']['greatesthealthpotion']['min'], dictitems['items']['greatesthealthpotion']['max'])
                         inventory.remove('greatesthealthpotion')
                         healthcap()
-                        print("Consuming one health potion...")
+                        print("Consuming one greatest health potion...")
                     else:
                         print("You don't have greatest health potions!")
-                time.sleep(1)
             else:
                 print("You don't have any health potions!")
+            time.sleep(1)
         elif X == '2':
-            switched_weapon = input('What weapon would you like to switch to?\n')
-            if switched_weapon in inventory and switched_weapon in dictitems['weapons']:
-                inventory.append(dictitems['weapons'][weapon]['name'])
-                weapon = dictitems['weapons'][switched_weapon]['name']
-            else:
-                print("You don't have that weapon.")
+            print("Inventory:")
+            weapon_inventory = [item for item in inventory if item in dictitems['weapons']]
+            for idx, item in enumerate(weapon_inventory, start=1):
+                print(f"    {idx}. {dictitems['weapons'][item]['dname']}")
+
+            try:
+                switched_weapon_idx = int(input('Enter the number of the weapon you would like to switch to:\n'))
+                if 1 <= switched_weapon_idx <= len(weapon_inventory):
+                    switched_weapon = weapon_inventory[switched_weapon_idx - 1]
+                    inventory.append(dictitems['weapons'][player_weapon]['name'])
+                    player_weapon = dictitems['weapons'][switched_weapon]['name']
+                    inventory.remove(switched_weapon)
+                else:
+                    print("Invalid selection.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
         elif not X:
-            events = [travling_merchant, tavern1, kidnappers, town, farmer_problem]
+            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern1, kidnappers, tavern_challenge]
             random.choice(events)()
         else:
             pass
             
 def start():
-    global player_stats, name, health, dev_mode_enabled, inventory, weapon, coin
-    player_stats = {'strength': 0.0, 'constitution': 0.0}
-    name = None
-    health = 20
-    inventory = ["healthpotion"]
-    weapon = 'ironshortsword'
-    coin = 0
-    print('Hello!')
-    time.sleep(.5)
-    print('Are you ready for an adventure??')
-    time.sleep(.5)
-    print('Yeah, I thought you were.')
-    print("Ok, first, let's create your character:")
+    global player_stats, name, player_health, dev_mode_enabled, inventory, player_weapon, player_armor, coin
     name = input("What will your character's name be?\n")
     if sfix(name) == 'dev':
         dev_mode_enabled = True
-        coin = 100
+    else:
+        name = name
+        inventory = ["healthpotion"]
+        player_weapon = 'ironshortsword'
+        player_armor = 'noarmor'
+        coin = 0
     print(f"That's not a bad name, {name}!")
     time.sleep(.5)
     print('Well, that is all, let us begin!')
@@ -825,9 +805,9 @@ def tavern1():
 def travling_merchant():
     print('A merchant, with his backpack filled to the brim with items, comes toward you.')
     time.sleep(1)
-    t = input('"Well hello there! Care to look in my shop?" (Y/N)\n')
+    t = input(f'{colors.ITALIC}Merchant{colors.ENDC}: Well, hello there! Care to look in my shop? (Y/N)\n')
     if t.lower() == 'y':
-        merchant_shop = shop("Merchant's Shop")
+        merchant_shop = shop("Merchant's Shop", 'Merchant')
         print('The merchant smiles,')
         time.sleep(.5)
         print('"Wonderful! See what you like."')
@@ -837,7 +817,7 @@ def travling_merchant():
         print('The merchant wonders away in solom.')
 
 def kidnappers():
-    kidnappers_fight = battle('Thugs', 10, 2, 'strength')
+    kidnappers_fight = battle('Thugs', 10, 2, 'strength', attackers_armor="leatherarmor")
     print('As you walk along the weaving path in the forest,')
     time.sleep(1)
     print('A group of thugs jumps from the bushes.')
@@ -877,7 +857,7 @@ def back_alley():
     response = input('Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n')
 
     if response == '1':
-        thug_fight = battle('Thugs', 20, 3, 'strength')
+        thug_fight = battle('Thugs', 20, 3, 'strength', attackers_armor="leatherarmor")
         print(f'\033[3m{name}\033[0m: As, I said, back the HELL AWAY!')
         time.sleep(2)
         thug_fight.fight()
@@ -922,27 +902,18 @@ def back_alley():
         error_found('Try again', 'Invalid option')
 
 def town():
-    print('\033[3m"You come across a village, should you enter is the question at hand..."\033[0m')
-    time.sleep(1)
-    x = input('Do you wish to enter? (Y/N)\n')
-    if x.lower() == 'y':
-        if 'healthpotion' not in inventory:
-            print(f'\033[3m{name}\033[0m: I do need some health potions...')
-        else:
-            print(f'\033[3m{name}\033[0m: I do need some things I am sure...')
-    else:
-        print(f'\033[3m{name}\033[0m: Ah, I do not need anything...')
-        random_event_picker()
-
-    print('\033[3mYou enter the village.\033[0m')
-    store1 = shop("Shop")
-    store2 = shop("Shop")
+    print('\033[3m"As you walk through a village, you ponder on what you should do..."\033[0m')
+    time.sleep(2)
+    
+    store1 = shop("Shop's Stock", 'Shopkeeper')
+    store2 = shop("Shop's Stock", 'Shopkeeper')
     time.sleep(1)
     while True:
         to_do = input(f'''
         Welcome to town!
 
-        Inventory: {inventory}
+        Inventory:
+            {displayinventory()}
 
         Hit ENTER to continue your journey.
 
@@ -967,11 +938,11 @@ def farmer_problem():
     fr = '\033[3mFarmer\033[0m'
 
     print('During your journey, you come across a farmer in a small town you are passing through.')
-    time.sleep(2)
+    time.sleep(1)
     print('He begs for your help,')
     time.sleep(1)
     print(f"{fr}: Please! Every night something eats my crops! I beg, everyone has regected, but can you help me?")
-    time.sleep(2)
+    time.sleep(1)
     helpquest = input('Should you help the man? (Y/N)\n')
     if sfix(helpquest) == 'y':
         print(f"{name}: Well, I don't see why not.")
@@ -979,9 +950,9 @@ def farmer_problem():
         print('The man graciously thanks you.')
         time.sleep(1)
         print(f"{fr}: Every night my berries always seem to be gone! Do you think you can stay overnight and discover what beast eats my berries?")
-        time.sleep(3)
-        print('You accept and, at night, after waiting for hours, you finally spot the thief.')
         time.sleep(2)
+        print('You accept and, at night, after waiting for hours, you finally spot the thief.')
+        time.sleep(1)
         print('A bear. And a large one at that.')
         time.sleep(1)
         scared_chance = .2
@@ -993,15 +964,15 @@ def farmer_problem():
             time.sleep(1)
             print('The bear stands on its hind legs, you fall backwards in fear.')
             time.sleep(1)
-            print('You dash before the bear dos anything else.')
+            print('You dash before the bear does anything else.')
             random_event_picker()
         choice_bear = input('Should you fight the bear, try to tame the bear, or should you leave it be? (1, 2, or 3)\n')
         if sfix(choice_bear) == '1':
             print('You charge the bear, frightening it.')
             time.sleep(1)
-            battle('Bear', 25, 3, 'strength', 'ng').fight()
+            battle('Bear', 25, 3, 'strength', 'ng', attackers_armor=2).fight()
         elif sfix(choice_bear) == '2':
-            print(f'{name}: Woah! Easier there.')
+            print(f'{name}: Woah! Easy there.')
             time.sleep(1)
             print('The bear seems to stare at you,')
             time.sleep(1)
@@ -1009,12 +980,12 @@ def farmer_problem():
             time.sleep(1)
             tame_chance = .25
             random_value = random.random()
-            if random_value < tame_chance:
-                if dev_mode_enabled:
+            if dev_mode_enabled:
                     print(f"tame chance: {tame_chance}\ncompared value: {random_value}")
+            if random_value > tame_chance:
                 print('As you reach out, however, the bear turns aggresive and lashes out at you.')
                 time.sleep(2)
-                battle('Bear', 25, 3, 'strength', 'ng').fight()
+                battle('Bear', 25, 3, 'strength', 'ng', attackers_armor=2).fight()
                 coin += 5
                 print("In the morning, the man is overjoyed to hear you've gotten rid of the pest problem.")
                 time.sleep(2)
@@ -1022,8 +993,6 @@ def farmer_problem():
                 random_event_picker()
             else:
                 coin += 7
-                if dev_mode_enabled:
-                    print(f"tame chance: {tame_chance}\ncompared value: {random_value}")
                 print('The bar cautiously walks towards you.')
                 time.sleep(1)
                 print('It nozzles its nose against your hand.')
@@ -1043,4 +1012,203 @@ def farmer_problem():
     else:
         print(f'{name}: Sorry, but I have too much to do, deal with it yourself.')
         random_event_picker()
+
+def lost_traveler():
+    global coin
+    print('While traveling along a beaten path in forest,\nyou come across a fellow who is flipping his map over and over, as if he was lost.')
+    time.sleep(2)
+    ask = input("Ask if he is lost? (Y/N)\n")
+    if sfix(ask) == 'y':
+        st = '\033[3mStranger\033[0m'
+        attack_chance = .05
+        questions_beginning = ['Hey, you lost?', 'Are you lost?', "Lost, stranger?", 'Need help?']
+        question_beginning = random.choice(questions_beginning)
+
+        print(f'{name}: {question_beginning}')
+        time.sleep(1)
+        print('The man looks to you.')
+        time.sleep(1)
+        print(f'{st}: Oh! Yes! Do you know the way to the nearest town?' )
+        time.sleep(1)
+        nearest_town = input(f'{st}: Well, do you? (Y/N)\n')
+        if sfix(nearest_town) == 'y':
+            print(f'{name}: Yeah, just up there.')
+            time.sleep(1)
+            print('You point up the hill.')
+            time.sleep(1)
+            print(f'{name}: Just up there, look beyond the horizon.')
+            time.sleep(1)
+            print('\033[3m"I wonder why he wants to go there...\033[0m')
+            time.sleep(1)
+            choice = input('Ask (Y/N)?')
+            if sfix(choice) == 'y':
+                attack_chance += .05
+                print(f'{name}: Can I ask why?')
+                time.sleep(1)
+                print(f'{st}: Oh, I just wanted to find a guide.')
+                time.sleep(1)
+                if coin <= 10:
+                    print('\033[3m"I could really use the coin..."\033[0m')
+                    time.sleep(1)
+                elif coin <= 25:
+                    print('\033[3m"I could do with more coin..."\033[0m')
+                    time.sleep(1)
+                help = input('\033[3mShould I suggest myself? (Y/N)\033[0m\n')
+                if sfix(help) == 'y':
+                    attack_chance += .1
+                    print(f'{name}: You know, I am quite the traveler myself.')
+                    time.sleep(1)
+                    print(f'{st}: Well; are you good with-')
+                    print('He pauses to lean in,')
+                    time.sleep(2)
+                    print(f'{st}: Secrects?')
+                    time.sleep(1)
+                    fight = input('"Sure" or "No"?\n')
+                    if sfix(fight) == 'sure':
+                        print(f'{name}: Sure, I can keep a secret.')
+                        time.sleep(1)
+                        print(f'{st}: Well, I am looking for a guide to walk me to the \033[3mNeverwinter Wood\033[0m?.')
+                        time.sleep(1)
+                        print(f'{name}: Well, I know the way well.')
+                        time.sleep(1)
+                        print(f'{st}: Oh, thank you so much!')
+                        time.sleep(1)
+                        print(f'{name}: No problem, just follow me.')
+                        journey_to_Neverwinter_Wood()
+                    else:
+                        random_value = random.random()
+                        print(f"{name}: I don't know, I'm sure you'll find a better guide in that town.")
+                        time.sleep(1)
+                        if random_value < attack_chance:
+                            print('The stranger looks at you coldly.')
+                            time.sleep(1)
+                            print(f'{st}: I do apologize, but, I must do this.')
+                            battle('Strange Traveler', 20, 5, 'strength', 25, 'ironlongsword', 'ironarmor').fight()
+            else:
+                print(f'{name}: Best of luck on your journeys!')
+                time.sleep(1)
+                print(f'{st}: Thanks many!')
+                random_event_picker()
+        else:
+            print('\033[3m"Whatever..."\033[0m')
+            time.sleep(1)
+            print('You pass by, ignoring the stranger.')
+            random_event_picker()
+
+def journey_to_Neverwinter_Wood():
+    st = '\033[3mStranger\033[0m'
+
+    print('You and the stranger walk along the path to the Neverwinter Wood.')
+    time.sleep(2)
+    print('The stranger and you are quiet.')
+    time.sleep(1)
+    print('And as you walk, you hear the sound of a twig snapping.')
+    time.sleep(2)
+    print('You turn around to see a hobgoblin in the distance.')
+    time.sleep(2)
+    print(f'{st}: What in the blazes is a hobgoblin doing in this terrain?')
+    time.sleep(1)
+    print("As the stranger speaks, the hobgoblin's ears perk.")
+    time.sleep(2)
+    print('It turns its head to you and the stranger.')
+    battle('Hobgoblin', 15, 3, 'strength', 10, attackers_armor='leatherarmor').fight()
+    print(f'{st}: This is percisely why I needed a guide.')
+    time.sleep(2)
+    print(f'{name}: Yeah, I can see that.')
+    time.sleep(1)
+    print('You continue mostly uninterrupted to the Neverwinter Wood.')
+    time.sleep(2)
+    print('And once you arrive,')
+    time.sleep(1)
+    choice = input(f'{st}: Do you think you could take me a little more into the woods? (Y/N)')
+    if sfix(choice) == 'y':
+        print(f'{name}: Sure, I can take you a little further.')
+        time.sleep(1)
+        print(f'{st}: Thank you so much!')
+        time.sleep(1)
+        print('You and the stranger walk further into the woods.')
+        time.sleep(2)
+        print('The stranger looks around,')
+        time.sleep(1)
+        print(f'{st}: NOW!!')
+        time.sleep(2)
+        print('You, surprised, start seeing hooded figures jump from the trees.')
+        time.sleep(2)
+        print("You see a sly smile on the stranger's face.")
+        time.sleep(2)
+        print('And as they grow nearer, you see the hooded figures pale faces and sharp teeth.')
+        time.sleep(2)
+        print('\033[3mVampires...\033[0m')
+        battle('Vampires', 30, 5, 'strength', 35, attackers_armor='hood').fight()
+        print(f'You finish off the vampires, they all lay dead.')
+        time.sleep(1)
+        print("You spit on the stranger's body as you walk out of the woods; continuing your journey.")
+        time.sleep(3)
+        random_event_picker()
+    else:
+        print(f'{name}: I think this is good enough.')
+        time.sleep(1)
+        print('The stranger curses as he walks off into the woods.')
+        time.sleep(1)
+        print("Oddly, you feel as if you've just avoided something awful.")
+        time.sleep(3)
+        random_event_picker()
+
+def tavern_challenge():
+    global player_health, coin
+    bt = '\033[3mBartender\033[0m'
+
+    print('Completely beat, you walk into a tavern.')
+    time.sleep(1)
+    print('As you walk in and sit down by the bartender.')
+    time.sleep(.5)
+    print('You notice a crowd around a table across the teavern; getting drunk as if their was no tommorrow.')
+    time.sleep(1)
+    print(f"{bt}: I see you interested.")
+    time.sleep(1)
+    choice = input(f'"Not really," or "What is going on?" (1 or 2)\n')
+    if sfix(choice) == '1':
+        print(f"{bt}: Well, those fools are drinking their heart out to win in a competition.")
+        time.sleep(1)
+        print(f"{bt}: Ya interested?")
+        time.sleep(1)
+        choice = input('(Y/N)\n')
+        if sfix(choice) == 'y':
+            print(f"{name} Why not? What's to lose?")
+            time.sleep(1)
+            print(f'{bt}: Actually, you do lose something; admission is 5 coins.')
+            time.sleep(.5)
+            print(f'{bt}: But hey, you could win the pot.')
+            time.sleep(.5)
+            choice = input(f'{colors.ITALIC}Should I..? (Y/N){colors.ENDC}')
+            if sfix(choice) == 'y':
+                if coin < 5:
+                    print(f'{bt}: Sorry, you do not have enough coins.')
+                    time.sleep(1)
+                    print(f'{bt}: You might have enough for a drink if you want though.')
+                    tavern().bartender()
+                else:
+                    amount_people = random.randint(3, 15)
+                    coin -= 5
+
+                    print('You give the bartender the 5 coins.')
+                    time.sleep(.5)
+                    print('You make you way down to the table.')
+                    time.sleep(.5)
+                    print(f'There seems to be {amount_people} people at the table.')
+                    time.sleep(1)
+                    print('You sit and prepare yourself as the large beer is placed in front of you.')
+                    time.sleep(1)
+                    print(f'{bt}: Alright, the rules are simple, drink the beer as fast as you can.')
+                    time.sleep(2)
+                    print(f'{bt}: The first to finish, wins.')
+                    time.sleep(2)
+                    print(f"{bt}: Now, let's begin!")
+        else:
+            print(f'{name}: Nah, just let me see what you sell.')
+            tavern().bartender()
+    else:
+        print(f'{name}: Nah, just let me see what you sell.')
+        tavern().bartender()
+
 start()

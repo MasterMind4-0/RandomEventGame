@@ -8,6 +8,13 @@
             "sellable": false,
             "InShop": false
         },
+        "naturalarmor": {
+            "name": "naturalarmor",
+            "dname": "Natural Armor",
+            "Armor": 1.5,
+            "sellable": false,
+            "InShop": false
+        },
         "ironarmor": {
             "name": "ironarmor",
             "dname": "Iron Armor",

@@ -139,9 +139,11 @@ class shop:
         4. Sell items\n
         ''')
 
-            t = input("Choose an option: ")
+            t = input("")
 
             if t == '1':
+                print(f'{tr}: {trader_prompt}')
+                time.sleep(.5)
                 if coin >= self.item1['price']:
                     coin -= self.item1['price']
                     inventory.append(self.item1['name'])
@@ -152,6 +154,8 @@ class shop:
                     print('You do not have enough money to buy that item.')
 
             elif t == '2':
+                print(f'{tr}: {trader_prompt}')
+                time.sleep(.5)
                 if coin >= self.item2['price']:
                     coin -= self.item2['price']
                     inventory.append(self.item2['name'])
@@ -162,6 +166,8 @@ class shop:
                     print('You do not have enough money to buy that item.')
 
             elif t == '3':
+                print(f'{tr}: {trader_prompt}')
+                time.sleep(.5)
                 if coin >= self.item3['price']:
                     coin -= self.item3['price']
                     inventory.append(self.item3['name'])
@@ -224,7 +230,7 @@ class shop:
                     elif sell_item in invalid_items:
                         error_found("Sell another item", "That item cannot be sold")
 
-            elif t == '5':
+            elif not t:
                 if traded:
                     print('The trader waves goodbye as you leave.')
                 else:
@@ -832,7 +838,7 @@ def back_alley():
     wait()
     print('You awaken in a dark alley way.')
     time.sleep(2)
-    print('Your head screams and you mouth thirsts.')
+    print('Your head screams and your mouth thirsts.')
     time.sleep(2)
     print('You notice it is night,')
     time.sleep(2)
@@ -1018,6 +1024,7 @@ def lost_traveler():
     print('While traveling along a beaten path in forest,\nyou come across a fellow who is flipping his map over and over, as if he was lost.')
     time.sleep(2)
     ask = input("Ask if he is lost? (Y/N)\n")
+
     if sfix(ask) == 'y':
         st = '\033[3mStranger\033[0m'
         attack_chance = .05
@@ -1031,67 +1038,62 @@ def lost_traveler():
         print(f'{st}: Oh! Yes! Do you know the way to the nearest town?' )
         time.sleep(1)
         nearest_town = input(f'{st}: Well, do you? (Y/N)\n')
+
         if sfix(nearest_town) == 'y':
-            print(f'{name}: Yeah, just up there.')
-            time.sleep(1)
             print('You point up the hill.')
             time.sleep(1)
             print(f'{name}: Just up there, look beyond the horizon.')
             time.sleep(1)
-            print('\033[3m"I wonder why he wants to go there...\033[0m')
+            print(f"{name}: Why you heading there?")
+            attack_chance += .05
+            print(f'{name}: Can I ask why?')
             time.sleep(1)
-            choice = input('Ask (Y/N)?')
-            if sfix(choice) == 'y':
-                attack_chance += .05
-                print(f'{name}: Can I ask why?')
+            print(f'{st}: Oh, I just wanted to find a guide.')
+            time.sleep(1)
+            if coin <= 10:
+                help = input('\033[3m"I could really use the coin... (Help or not)\n"\033[0m')
                 time.sleep(1)
-                print(f'{st}: Oh, I just wanted to find a guide.')
+            elif coin <= 25:
+                help = input('\033[3m"I could do with more coin... (Help or not)\n"\033[0m')
                 time.sleep(1)
-                if coin <= 10:
-                    print('\033[3m"I could really use the coin..."\033[0m')
-                    time.sleep(1)
-                elif coin <= 25:
-                    print('\033[3m"I could do with more coin..."\033[0m')
-                    time.sleep(1)
-                help = input('\033[3mShould I suggest myself? (Y/N)\033[0m\n')
-                if sfix(help) == 'y':
-                    attack_chance += .1
-                    print(f'{name}: You know, I am quite the traveler myself.')
-                    time.sleep(1)
-                    print(f'{st}: Well; are you good with-')
-                    print('He pauses to lean in,')
-                    time.sleep(2)
-                    print(f'{st}: Secrects?')
-                    time.sleep(1)
-                    fight = input('"Sure" or "No"?\n')
-                    if sfix(fight) == 'sure':
-                        print(f'{name}: Sure, I can keep a secret.')
-                        time.sleep(1)
-                        print(f'{st}: Well, I am looking for a guide to walk me to the \033[3mNeverwinter Wood\033[0m?.')
-                        time.sleep(1)
-                        print(f'{name}: Well, I know the way well.')
-                        time.sleep(1)
-                        print(f'{st}: Oh, thank you so much!')
-                        time.sleep(1)
-                        print(f'{name}: No problem, just follow me.')
-                        journey_to_Neverwinter_Wood()
-                    else:
-                        random_value = random.random()
-                        print(f"{name}: I don't know, I'm sure you'll find a better guide in that town.")
-                        time.sleep(1)
-                        if random_value < attack_chance:
-                            print('The stranger looks at you coldly.')
-                            time.sleep(1)
-                            print(f'{st}: I do apologize, but, I must do this.')
-                            battle('Strange Traveler', 20, 5, 'strength', 25, 'ironlongsword', 'ironarmor').fight()
-            else:
-                print(f'{name}: Best of luck on your journeys!')
+
+            if sfix(help) == 'y':
+                attack_chance += .1
+                print(f'{name}: You know, I am quite the traveler myself.')
                 time.sleep(1)
-                print(f'{st}: Thanks many!')
-                random_event_picker()
+                print(f'{st}: Well; are you good with-')
+                print('He pauses to lean in,')
+                time.sleep(2)
+                print(f'{st}: Secrets?')
+                time.sleep(1)
+                fight = input('"Sure" or "No"?\n')
+
+                if sfix(fight) == 'sure':
+                    print(f'{name}: Sure, I can keep a secret.')
+                    time.sleep(1)
+                    print(f'{st}: Well, I am looking for a guide to walk me to the \033[3mNeverwinter Wood\033[0m?.')
+                    time.sleep(1)
+                    print(f'{name}: Well, I know the way well.')
+                    time.sleep(1)
+                    print(f'{st}: Oh, thank you so much!')
+                    time.sleep(1)
+                    print(f'{name}: No problem, just follow me.')
+                    journey_to_Neverwinter_Wood()
+                else:
+                    random_value = random.random()
+                    print(f"{name}: I don't know, I'm sure you'll find a better guide in that town.")
+                    time.sleep(1)
+
+                    if random_value < attack_chance:
+                        print('The stranger looks at you coldly.')
+                        time.sleep(1)
+                        print(f'{st}: I do apologize, but, I must do this.')
+                        battle('Strange Traveler', 20, 5, 'strength', 25, 'ironlongsword', 'ironarmor').fight()
+                    print(f'{st}: Well, thanks anyway!')
+                    random_event_picker()
         else:
             print('\033[3m"Whatever..."\033[0m')
-            time.sleep(1)
+            time.sleep(.5)
             print('You pass by, ignoring the stranger.')
             random_event_picker()
 
@@ -1111,7 +1113,7 @@ def journey_to_Neverwinter_Wood():
     print("As the stranger speaks, the hobgoblin's ears perk.")
     time.sleep(2)
     print('It turns its head to you and the stranger.')
-    battle('Hobgoblin', 15, 3, 'strength', 10, attackers_armor='leatherarmor').fight()
+    battle('Hobgoblin', 15, 3, 'strength', 10, attackers_armor='naturalarmor').fight()
     print(f'{st}: This is percisely why I needed a guide.')
     time.sleep(2)
     print(f'{name}: Yeah, I can see that.')
@@ -1164,20 +1166,20 @@ def tavern_challenge():
     time.sleep(.5)
     print('You notice a crowd around a table across the teavern; getting drunk as if their was no tommorrow.')
     time.sleep(1)
-    print(f"{bt}: I see you interested.")
+    print(f"{bt}: I see you're interested.")
     time.sleep(1)
     choice = input(f'"Not really," or "What is going on?" (1 or 2)\n')
-    if sfix(choice) == '1':
+    if sfix(choice) == '2':
         print(f"{bt}: Well, those fools are drinking their heart out to win in a competition.")
         time.sleep(1)
-        print(f"{bt}: Ya interested?")
+        print(f"{bt}: Ya interested?\n")
         time.sleep(1)
         choice = input('(Y/N)\n')
         if sfix(choice) == 'y':
-            print(f"{name} Why not? What's to lose?")
+            print(f"{name}: Why not? What's to lose?")
             time.sleep(1)
             print(f'{bt}: Actually, you do lose something; admission is 5 coins.')
-            time.sleep(.5)
+            time.sleep(1)
             print(f'{bt}: But hey, you could win the pot.')
             time.sleep(.5)
             choice = input(f'{colors.ITALIC}Should I..? (Y/N){colors.ENDC}')
@@ -1187,28 +1189,57 @@ def tavern_challenge():
                     time.sleep(1)
                     print(f'{bt}: You might have enough for a drink if you want though.')
                     tavern().bartender()
+                    random_event_picker()
                 else:
                     amount_people = random.randint(3, 15)
+                    random_value = random.random()
+                    win_chance = .45 - (player_stats['constitution'] / 10)
                     coin -= 5
 
                     print('You give the bartender the 5 coins.')
-                    time.sleep(.5)
-                    print('You make you way down to the table.')
-                    time.sleep(.5)
-                    print(f'There seems to be {amount_people} people at the table.')
-                    time.sleep(1)
-                    print('You sit and prepare yourself as the large beer is placed in front of you.')
-                    time.sleep(1)
-                    print(f'{bt}: Alright, the rules are simple, drink the beer as fast as you can.')
                     time.sleep(2)
+                    print('You make you way down to the table.')
+                    time.sleep(2)
+                    print(f'There seems to be {amount_people} people at the table.')
+                    time.sleep(2)
+                    print('You sit and prepare yourself as the large beer is placed in front of you.')
+                    time.sleep(3)
+                    print(f'{bt}: Alright, the rules are simple, drink the beer as fast as you can.')
+                    time.sleep(4)
                     print(f'{bt}: The first to finish, wins.')
                     time.sleep(2)
                     print(f"{bt}: Now, let's begin!")
+                    time.sleep(2)
+                    if random_value < win_chance:
+                        coin += 5 * amount_people
+                        print('As you drink your large mug of ale,')
+                        time.sleep(.5)
+                        print("You don't even pay attention to the others, you're set on your goal of winning.")
+                        time.sleep(1)
+                        print('And just before you black out, you take the last swig and slam the mug on the table.')
+                        time.sleep(1)
+                        print('You barely manage to hear the bartender saying you won.')
+                        time.sleep(1)
+                        print('You completely pass out, everything far beyond a haze.')
+                        time.sleep(1)
+                        print('You walk up on the streets in front of the tavern with a nasty headache. You shrug it off and get up to continue your journey.')
+                        random_event_picker()
+                    else:
+                        print('As you down the mug, it sloshes down your chin.')
+                        time.sleep(1)
+                        print('And right there your fall, completely knocked out.')
+                        time.sleep(1)
+                        print(f'{name}: Ugh...')
+                        back_alley()
+
+                    
         else:
             print(f'{name}: Nah, just let me see what you sell.')
             tavern().bartender()
+            random_event_picker()
     else:
         print(f'{name}: Nah, just let me see what you sell.')
         tavern().bartender()
+        random_event_picker()
 
 start()

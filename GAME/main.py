@@ -14,6 +14,17 @@ def generate_healing(x: int, y: int):
     healing = random.randint(x, y)
     return healing
 
+def calculate_chance(chance: float, modifier = None):
+    random_value = random.random()
+    if modifier:
+        win_chance = chance - (player_stats[modifier] / 10)
+    else:
+        win_chance = chance
+    if random_value < win_chance:
+        return True
+    else:
+        return False
+
 try:
     with open('GAME/Game_Data/items.json', 'r') as f:
         dictitems = json.load(f)
@@ -364,6 +375,82 @@ class tavern:
 
             else:
                 print('Invalid')
+
+    def back_alley(self):
+        global coin, inventory
+        thug = '\033[3mThug\033[0m'
+        thug_leader = '\033[3mThug Leader\033[0m'
+        wait()
+        print('You awaken in a dark alley way.')
+        time.sleep(2)
+        print('Your head screams and your mouth thirsts.')
+        time.sleep(2)
+        print('You notice it is night,')
+        time.sleep(2)
+        print('As you were looking around, you happened to notice a shadow walking toward you...')
+        time.sleep(2)
+        print(f"{thug_leader}: Hey, you. The sorry looking filth.")
+        time.sleep(2)
+        print('You notice two other figures behind the masked fellow.')
+        time.sleep(2)
+        print(f"\033[0m{name}\033[0m: Just get away from me.")
+        time.sleep(2)
+        print(f'{thug_leader}: Well! Look at the little rascal!')
+        time.sleep(2)
+        print(f'{thug}: Feisty little rascal, he is.')
+        time.sleep(2)
+        print('\033[3m"Said the figures in the back."\033[0m')
+        time.sleep(2)
+        print(f"{thug_leader}: Ok, let's cut to the chase, give us everything you got.")
+        time.sleep(2)
+        print(f"{thug}: And we mean everything!")
+        time.sleep(2)
+        response = input('Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n')
+
+        if response == '1':
+            thug_fight = battle('Thugs', 20, 3, 'strength', attackers_armor="leatherarmor")
+            print(f'\033[3m{name}\033[0m: As, I said, back the HELL AWAY!')
+            time.sleep(2)
+            thug_fight.fight()
+        elif response == '2':
+            print(f"\033[3m{name}\033[0m: Fine, fine, yes. I'll give my stuff.")
+            time.sleep(1)
+            while True:
+                stuff_given = input(f'''
+            Inventory: {inventory}
+
+            What do you give?\n
+            ''')
+                if stuff_given.lower() in inventory and stuff_given in dictitems:
+                    inventory.remove(sfix(stuff_given))
+                    print(f'\033[3m"You give the {stuff_given} to the men, they look you up and down."\033[0m')
+                    time.sleep(1)
+                    print(f"{thug_leader}: Well then, that wasn't too hard now, was it?")
+                    time.sleep(1)
+                    print('\033[3m"The thugs disappear into the darkness."\033[0m')
+                    time.sleep(1)
+                    print(f'{thug_leader}: Not that hard at all...')
+                    random_event_picker()
+                else:
+                    error_found("Try again", "Invalid option")
+        elif response == '3':
+            inventory = []
+            print(f"\033[3m{name}\033[0m: OK, OK! Here.")
+            time.sleep(1)
+            print('\033[3m"You hand the thugs all your things, their mouths foam with envy. A good haul for them."\033[0m')
+            time.sleep(1)
+            print(f"{thug_leader}: I knew you'd come to your senses friend!")
+            time.sleep(.5)
+            print(f"{thug_leader}: Yeah, these knuckle-heads didn't believe me, but I knew it." )
+            time.sleep(1)
+            print(f"{thug_leader}: Well, friend, until we meet again!")
+            time.sleep(1)
+            print('\033[3m"The thugs disappear into the darkness."\033[0m')
+            time.sleep(1)
+            print(f'{thug_leader}: Until we meet again...')
+            random_event_picker()
+        else:
+            error_found('Try again', 'Invalid option')
 
     def bartender(self):
         global coin
@@ -784,7 +871,7 @@ def random_event_picker():
             except ValueError:
                 print("Invalid input. Please enter a number.")
         elif not X:
-            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern1, kidnappers, tavern_challenge]
+            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern1, kidnappers, tavern_challenge, skeleton_attack]
             random.choice(events)()
         else:
             pass
@@ -830,82 +917,6 @@ def kidnappers():
     time.sleep(1)
     print("\033[3mThugs\033[0m: Get em boys!")
     kidnappers_fight.fight()
-
-def back_alley():
-    global coin
-    thug = '\033[3mThug\033[0m'
-    thug_leader = '\033[3mThug Leader\033[0m'
-    wait()
-    print('You awaken in a dark alley way.')
-    time.sleep(2)
-    print('Your head screams and your mouth thirsts.')
-    time.sleep(2)
-    print('You notice it is night,')
-    time.sleep(2)
-    print('As you were looking around, you happened to notice a shadow walking toward you...')
-    time.sleep(2)
-    print(f"{thug_leader}: Hey, you. The sorry looking filth.")
-    time.sleep(2)
-    print('You notice two other figures behind the masked fellow.')
-    time.sleep(2)
-    print(f"\033[0m{name}\033[0m: Just get away from me.")
-    time.sleep(2)
-    print(f'{thug_leader}: Well! Look at the little rascal!')
-    time.sleep(2)
-    print(f'{thug}: Feisty little rascal, he is.')
-    time.sleep(2)
-    print('\033[3m"Said the figures in the back."\033[0m')
-    time.sleep(2)
-    print(f"{thug_leader}: Ok, let's cut to the chase, give us everything you got.")
-    time.sleep(2)
-    print(f"{thug}: And we mean everything!")
-    time.sleep(2)
-    response = input('Should you fight, give them some stuff, or give them all of your stuff? (1, 2, or 3?)\n')
-
-    if response == '1':
-        thug_fight = battle('Thugs', 20, 3, 'strength', attackers_armor="leatherarmor")
-        print(f'\033[3m{name}\033[0m: As, I said, back the HELL AWAY!')
-        time.sleep(2)
-        thug_fight.fight()
-    elif response == '2':
-        print(f"\033[3m{name}\033[0m: Fine, fine, yes. I'll give my stuff.")
-        time.sleep(1)
-        while True:
-            stuff_given = input(f'''
-        Inventory: {inventory}
-
-        What do you give?\n
-        ''')
-            if stuff_given.lower() in inventory and stuff_given in dictitems:
-                inventory.remove(stuff_given.lower())
-                print(f'\033[3m"You give the {stuff_given} to the men, they look you up and down."\033[0m')
-                time.sleep(1)
-                print(f"{thug_leader}: Well then, that wasn't too hard now, was it?")
-                time.sleep(1)
-                print('\033[3m"The thugs disappear into the darkness."\033[0m')
-                time.sleep(1)
-                print(f'{thug_leader}: Not that hard at all...')
-                random_event_picker()
-            else:
-                error_found("Try again", "Invalid option")
-    elif response == '3':
-        inventory = []
-        print(f"\033[3m{name}\033[0m: OK, OK! Here.")
-        time.sleep(1)
-        print('\033[3m"You hand the thugs all your things, their mouths foam with envy. A good haul for them."\033[0m')
-        time.sleep(1)
-        print(f"{thug_leader}: I knew you'd come to your senses friend!")
-        time.sleep(.5)
-        print(f"{thug_leader}: Yeah, these knuckle-heads didn't believe me, but I knew it." )
-        time.sleep(1)
-        print(f"{thug_leader}: Well, friend, until we meet again!")
-        time.sleep(1)
-        print('\033[3m"The thugs disappear into the darkness."\033[0m')
-        time.sleep(1)
-        print(f'{thug_leader}: Until we meet again...')
-        random_event_picker()
-    else:
-        error_found('Try again', 'Invalid option')
 
 def town():
     print('\033[3m"As you walk through a village, you ponder on what you should do..."\033[0m')
@@ -1231,8 +1242,6 @@ def tavern_challenge():
                         time.sleep(1)
                         print(f'{name}: Ugh...')
                         back_alley()
-
-                    
         else:
             print(f'{name}: Nah, just let me see what you sell.')
             tavern().bartender()
@@ -1241,5 +1250,44 @@ def tavern_challenge():
         print(f'{name}: Nah, just let me see what you sell.')
         tavern().bartender()
         random_event_picker()
+
+def skeleton_attack():
+    global player_health
+    print('You come across a dead body, its skeleton showing through the rotton flesh.')
+    time.sleep(1)
+    choice = input('Should you loot the body, walk away, or bury the body? (1, 2, or 3)\n')
+    if sfix(choice) == '1':
+        if calculate_chance(.7):
+            coin += random.randint(3, 12)
+            print('The body animates as you come near,')
+            time.sleep(1)
+            print('It screeches and lunges at you.')
+            time.sleep(1)
+            battle('Skeleton', 10, 2, 'strength', attackers_armor='naturalarmor', reward_item="bonedagger").fight()
+            print('You wipe the sweat off your brow.')
+            time.sleep(1)
+            print('You also loot the body and find a couple coins.')
+            random_event_picker()
+        else:
+            coin += random.randint(6, 16)
+            print('You loot the body of its past lifes belongings.')
+            random_event_picker()
+    elif sfix(choice) == '2':
+        print('You decided to leave, best to leave the dead to the body collectors.')
+        random_event_picker()
+    elif sfix(choice) == '3':
+        if calculate_chance(.5):
+            print('The body animates as you come near,')
+            time.sleep(1)
+            print('It screeches and lunges at you.')
+            time.sleep(1)
+            battle('Skeleton', 10, 2, 'strength', attackers_armor='naturalarmor', reward_item="bonedagger").fight()
+            print('Once you kill the undead. You bury the body.')
+            time.sleep(2)
+            print('You wipe the sweat off your brow as you leave.')
+            random_event_picker()
+        else:
+            print('You bury the body, say your prayers, and leave.')
+            random_event_picker()
 
 start()

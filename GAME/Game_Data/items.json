@@ -72,6 +72,14 @@
             "price": 8,
             "sellable": true,
             "InShop": true
+        },
+        "bonedagger": {
+            "name": "bonedagger",
+            "dname": "Bone Dagger",
+            "Damage": 1.5,
+            "price": 12,
+            "sellable": true,
+            "InShop": false
         }
     },
     "items": {

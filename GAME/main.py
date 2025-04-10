@@ -507,7 +507,7 @@ class tavern:
                         print('The last thing you hear before passing out is the bartender.')
                         time.sleep(1)
                         print(f"{bt}: How the hell do you pass out from bloody wine?")
-                        back_alley()
+                        self.back_alley()
                     elif self.item1 == 'wine':
                         print('You sip your wine gently, soaking in the flavor and aroma.')
                         time.sleep(1)
@@ -515,7 +515,7 @@ class tavern:
                         print('After downing your mug, you can barely stand.')
                         time.sleep(1)
                         print('You drunkly walk outside, before you pass out.')
-                        back_alley()
+                        self.back_alley()
                     else:
                         print('You lift you chin and gulp the liquor to the last drop.')
                         time.sleep(1)
@@ -549,7 +549,7 @@ class tavern:
                         print('The last thing you hear before passing out is the bartender.')
                         time.sleep(1)
                         print(f"{bt}: How the hell do you pass out from bloody wine?")
-                        back_alley()
+                        self.back_alley()
                     elif self.item2 == 'wine':
                         print('You sip your wine gently, soaking in the flavor and aroma.')
                         time.sleep(1)
@@ -557,7 +557,7 @@ class tavern:
                         print('After downing your mug, you can barely stand.')
                         time.sleep(1)
                         print('You drunkly walk outside, before you pass out.')
-                        back_alley()
+                        self.back_alley()
                     else:
                         print('You lift you chin and gulp the liquor to the last drop.')
                         time.sleep(1)
@@ -589,7 +589,7 @@ class tavern:
                         time.sleep(1)
                         if wasted:
                             print('But, alas, it still hits your stomach with such force, you can barely finish.')
-                            back_alley()
+                            self.back_alley()
                         else:
                             if dev_mode_enabled:
                                 print(f'Previous constitution score: {player_stats["constitution"]}')
@@ -1067,8 +1067,11 @@ def lost_traveler():
             elif coin <= 25:
                 help = input('\033[3m"I could do with more coin... (Help or not)\n"\033[0m')
                 time.sleep(1)
+            else:
+                help = input('\033[3m"Well, maybe I could help him... (Help or not)\n"\033[0m')
+                time.sleep(1)
 
-            if sfix(help) == 'y':
+            if sfix(help) == 'help':
                 attack_chance += .1
                 print(f'{name}: You know, I am quite the traveler myself.')
                 time.sleep(1)
@@ -1102,6 +1105,13 @@ def lost_traveler():
                         battle('Strange Traveler', 20, 5, 'strength', 25, 'ironlongsword', 'ironarmor').fight()
                     print(f'{st}: Well, thanks anyway!')
                     random_event_picker()
+            
+            else:
+                print(f"{name}: Best of luck on your journeys, then.")
+                time.sleep(1)
+                print('The man smiles as he leaves.')
+                random_event_picker()
+
         else:
             print('\033[3m"Whatever..."\033[0m')
             time.sleep(.5)
@@ -1175,7 +1185,7 @@ def tavern_challenge():
     time.sleep(1)
     print('As you walk in and sit down by the bartender.')
     time.sleep(.5)
-    print('You notice a crowd around a table across the teavern; getting drunk as if their was no tommorrow.')
+    print('You notice a crowd around a table across the tavern; getting drunk as if their was no tommorrow.')
     time.sleep(1)
     print(f"{bt}: I see you're interested.")
     time.sleep(1)
@@ -1241,7 +1251,7 @@ def tavern_challenge():
                         print('And right there your fall, completely knocked out.')
                         time.sleep(1)
                         print(f'{name}: Ugh...')
-                        back_alley()
+                        tavern().back_alley()
         else:
             print(f'{name}: Nah, just let me see what you sell.')
             tavern().bartender()
@@ -1252,7 +1262,7 @@ def tavern_challenge():
         random_event_picker()
 
 def skeleton_attack():
-    global player_health
+    global player_health, coin
     print('You come across a dead body, its skeleton showing through the rotton flesh.')
     time.sleep(1)
     choice = input('Should you loot the body, walk away, or bury the body? (1, 2, or 3)\n')

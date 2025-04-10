@@ -452,6 +452,78 @@ class tavern:
         else:
             error_found('Try again', 'Invalid option')
 
+    def rat_mini_game(self):
+        global coin
+        bt = '\033[3mBartender\033[0m'
+        coin_gain_cache = 0
+        rat_kill_count = 0
+        room = "stairs"
+        
+        print('You look around the cellar, where to go now..')
+        time.sleep(1)
+        while coin_gain_cache < 30:
+            option_1 = '1. Main Cellar'
+            option_2 = '2. Storage Room'
+            option_3 = '3. Back Room'
+            
+            if room == 'main cellar':
+                option_1 = '1. Main Cellar (You are here)'
+            elif room == 'storage room':
+                option_2 = '2. Storage Room (You are here)'
+            elif room == 'back room':
+                option_3 = '3. Back Room (You are here)'
+
+            
+            
+            go_to = input(f'''
+                
+                Rat kill count: {rat_kill_count}
+                
+                Actions:
+                
+                Hit ENTER to go to a random room
+                
+                {option_1}
+                {option_2}
+                {option_3}
+                4. Back to the bartender
+                ''')
+            
+            if go_to == '1' and option_1 == '1. Main Cellar':
+                room = 'main cellar'
+            elif go_to == '2' and option_2 == '2. Storage Room':
+                room = 'storage room'
+            elif go_to == '3' and option_3 == '3. Back Room':
+                room = 'back room'
+            elif go_to == '4':
+                print('You walk back to the bartender.')
+                time.sleep(1)
+                print(f'{bt}: You killed {coin_gain_cache} those darn rats! Here, you bloody earned it!')
+                time.sleep(1)
+                coin += coin_gain_cache
+                print(f'You gained {coin_gain_cache} coins!')
+            else:
+                print('Invalid option, try again.')
+            
+            print(f'You walk around the {room}, looking for rats.')
+            time.sleep(2)
+            if calculate_chance(.5):
+                print('You hear a loud screeching sound.')
+                time.sleep(1)
+                battle('Rats', 2, 1, 'strength', attackers_armor='naturalarmor').fight()
+                coin_gain_cache += 1
+                rat_kill_count += 1
+            else:
+                print('You look around, but there are no rats in sight.')
+                time.sleep(2)
+
+        print('You wiped to sweat from your brow. They were all dead.')
+        time.sleep(1)
+        print(f'{bt}: You killed {coin_gain_cache} those darn rats! Here, you bloody earned it!')
+        time.sleep(1)
+        coin += coin_gain_cache
+        print(f'You gained {coin_gain_cache} coins!')
+            
     def bartender(self):
         global coin
         btgreetings = ['How are you doing today?', 'What can I get you?',"We don't have virgin here for the record.","I feel sorry for people who don't drink. When they wake up in the morning, that's as good as they're going to feel all day."]
@@ -459,6 +531,12 @@ class tavern:
         btleave = ['Pleasure doing business.', 'Hope to see you again.','Until you order again.']
         choice_of_greeting = random.choice(btgreetings)
         bt = '\033[3mBartender\033[0m'
+        rats = calculate_chance(.25)
+        if rats:
+            rat_problem = "\nType RAT to help the bartender with a rat problem.\n"
+        else:
+            rat_problem = ''
+        
 
         print(f'{bt}: {choice_of_greeting}')
         wait()
@@ -468,7 +546,7 @@ class tavern:
 
             menu_entry = input(f'''
         {self.name}'s menu
-
+        {rat_problem}
         Hit ENTER to leave
 
         1. {self.item1['dname']} ({self.item1['price']} coins)
@@ -600,6 +678,16 @@ class tavern:
                                 player_stats['constitution'] += self.house_special['exp']
                             print(f"{bt}: Well, I would not have guessed you'd be able to stand after that,")
                             time.sleep(1)
+            
+            
+            elif menu_entry.lower() == 'rat':
+                if rats:
+                    rats = False
+                    print(f'{bt}: You want to help me with the rat problem?')
+                    time.sleep(1)
+                    print(f'{bt}: I have a few rats in the cellar, and I need someone to take care of them.')
+                    time.sleep(1)
+                    self.rat_mini_game()
 
             elif not menu_entry:
                 print(f'\033[3m{name}\033[0m: Thank you, but I think I am OK.')
@@ -624,6 +712,8 @@ class battle:
             self.reward_item: str = reward_item
         if not reward_gold:
             self.reward_gold = attackers_health * .4
+            if self.reward_gold < 1:
+                self.reward_gold = 0
             self.reward_gold = round(self.reward_gold)
         elif reward_gold == 'ng':
             self.reward_gold = 0
@@ -727,11 +817,16 @@ class battle:
                 print(f"The {self.attackers_name} has {self.attackers_health} left!")
         else:
             if player_armor:
-                player_health -= self.attackers_damage - (0.2 * determine_armor(player_armor))
-                player_health = round(player_health)
-                print(f"The {self.attackers_name} hit you!")
-                time.sleep(.5)
-                print(f"You have {player_health} health left!")
+                player_health_damage_tracker = player_health
+                player_health_damage_tracker -= self.attackers_damage - (0.2 * determine_armor(player_armor))
+                player_health_damage_tracker = round(player_health_damage_tracker)
+                if player_health_damage_tracker == player_health:
+                    print(f"The {self.attackers_name} tried to hit you, but your armor absorbed the damage!")
+                    time.sleep(1)
+                else:
+                    print(f"The {self.attackers_name} hit you!")
+                    time.sleep(.5)
+                    print(f"You have {player_health} health left!")
 
     def calculate_hit_chance(self, armor):
         random_value = random.random()
@@ -871,7 +966,7 @@ def random_event_picker():
             except ValueError:
                 print("Invalid input. Please enter a number.")
         elif not X:
-            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern1, kidnappers, tavern_challenge, skeleton_attack]
+            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern_event, kidnappers, tavern_challenge, skeleton_attack, tavern_rats]
             random.choice(events)()
         else:
             pass
@@ -892,7 +987,7 @@ def start():
     print('Well, that is all, let us begin!')
     random_event_picker()
 
-def tavern1():
+def tavern_event():
     tavern().enter_tavern()
 
 def travling_merchant():
@@ -1299,5 +1394,46 @@ def skeleton_attack():
         else:
             print('You bury the body, say your prayers, and leave.')
             random_event_picker()
+
+def tavern_rats():
+    global coin
+    bt = '\033[3mBartender\033[0m'
+    
+    print('As you were waiting for the bartender at a lonely bar a stormy night,')
+    time.sleep(1)
+    print('The bartender walks up to you-- with a solemn look on his face.')
+    time.sleep(1)
+    print(f'{bt}: I know you came here for a drink, but you look like you can handle a problem of mine.')
+    time.sleep(1)
+    print(f'{bt}: As you can see, this tavern does not have the most amount of clients.')
+    time.sleep(1)
+    print(f'{bt}: The problem is, I have a rat problem in the cellar, and I need someone to take care of it.')
+    time.sleep(2)
+    accept = input(f'{bt}: I can pay you a a coin for each damned rat you kill. (Y/N)\n')
+    if sfix(accept) == 'y':
+        print(f'{name}: Why not.')
+        time.sleep(1)
+        print(f'{bt}: Right down this way, please.')
+        time.sleep(1)
+        print('You walk down the stairs to the cellar.')
+        time.sleep(2)
+        print('And as you walk down the stairs, you hear a loud screeching sound.')
+        time.sleep(2)
+        battle('Rats', 2, 1, 'strength', attackers_armor='naturalarmor').fight()
+        print('You finish off the rat, and look around the cellar.')
+        time.sleep(1)
+        print(f"{name}: A coin a rat...")
+        time.sleep(1)
+        tavern().rat_mini_game()
+        random_event_picker()
+    else:
+        print(f'{name}: Sorry, but I am here just for a drink.')
+        time.sleep(1)
+        print('The bartender signs.')
+        time.sleep(1)
+        print(f'{bt}: Well, I guess I can understand that.')
+        time.sleep(2)
+        tavern().bartender()
+        random_event_picker()
 
 start()

@@ -12,7 +12,7 @@
         "naturalarmor": {
             "name": "naturalarmor",
             "dname": "Natural Armor",
-            "Armor": 1.5,
+            "Armor": 0.1,
             "sellable": false,
             "InShop": false,
             "Craftable": false
@@ -20,7 +20,7 @@
         "ironarmor": {
             "name": "ironarmor",
             "dname": "Iron Armor",
-            "Armor": 5,
+            "Armor": 0.35,
             "price": 30,
             "sellable": true,
             "InShop": true,
@@ -33,7 +33,7 @@
         "leatherarmor": {
             "name": "leatherarmor",
             "dname": "Leather Armor",
-            "Armor": 3,
+            "Armor": 0.25,
             "price": 15,
             "sellable": true,
             "InShop": true,
@@ -46,7 +46,7 @@
         "hood": {
             "name": "hood",
             "dname": "Hood",
-            "Armor": 0.5,
+            "Armor": 0.07,
             "price": 10,
             "sellable": true,
             "InShop": true,

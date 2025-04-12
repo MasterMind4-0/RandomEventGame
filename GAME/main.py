@@ -31,7 +31,7 @@ try:
 except FileNotFoundError or json.JSONDecodeError as e:
     error_found('There was an error loading the items database.', e)
 
-player_stats = {'strength': 0.0, 'constitution': 0.0}
+player_stats = {'strength': 0.0, 'constitution': 0.0, 'dexterity': 0.0}
 name = 'DEV'
 player_health = 20
 dev_mode_enabled = False
@@ -64,11 +64,11 @@ def wait():
         pass
     else:
         print('.\n')
-        time.sleep(1)
+        time.sleep(.5)
         print('..\n')
-        time.sleep(1)
+        time.sleep(.5)
         print('...\n')
-        time.sleep(1)
+        time.sleep(.5)
 
 def healthcap():
     global player_health
@@ -724,7 +724,7 @@ class battle:
         global player_health, inventory, player_weapon, coin, player_stats
 
         if dev_mode_enabled:
-            sim_question = input('Would you prefer to simulate a battle instead? (Y/N)\n')
+            sim_question = input(f'{colors.DEV}Would you prefer to simulate a battle instead? (Y/N)\n{colors.ENDC}')
             if sim_question.lower() == 'y':
                 self.simulate_fight()
                 return
@@ -814,26 +814,32 @@ class battle:
             print(f"The {self.attackers_name} missed! Giving you the opportunity to attack!")
             time.sleep(.5)
             if dev_mode_enabled:
-                print(f"The {self.attackers_name} has {self.attackers_health} left!")
+                print(f"{colors.DEV}The {self.attackers_name} has {self.attackers_health} left!{colors.ENDC}")
         else:
             if player_armor:
                 player_health_damage_tracker = player_health
-                player_health_damage_tracker -= self.attackers_damage - (0.2 * determine_armor(player_armor))
+                player_health_damage_tracker -= self.attackers_damage - determine_armor(player_armor)
                 player_health_damage_tracker = round(player_health_damage_tracker)
                 if player_health_damage_tracker == player_health:
                     print(f"The {self.attackers_name} tried to hit you, but your armor absorbed the damage!")
                     time.sleep(1)
                 else:
+                    player_health = player_health_damage_tracker
                     print(f"The {self.attackers_name} hit you!")
                     time.sleep(.5)
                     print(f"You have {player_health} health left!")
+            else:
+                player_health -= self.attackers_damage
+                print(f"The {self.attackers_name} hit you!")
+                time.sleep(.5)
+                print(f"You have {player_health} health left!")
 
     def calculate_hit_chance(self, armor):
         random_value = random.random()
-        base_hit_chance = .5
-        hit_chance = base_hit_chance - (armor * .02)
+        base_hit_chance = .75
+        hit_chance = base_hit_chance - armor
         if dev_mode_enabled:
-            print(f"Hit chance: {hit_chance}\nArmor: {self.attackers_armor}\nBase hit chance: {base_hit_chance}\nHit chance {hit_chance} < compared value {random_value} {hit_chance < random_value}")
+            print(f"{colors.DEV}Hit chance: {hit_chance}\nArmor: {self.attackers_armor}\nBase hit chance: {base_hit_chance}\nHit chance {hit_chance} < compared value {random_value} {hit_chance < random_value}{colors.ENDC}")
         return random_value < hit_chance
 
     def simulate_fight(self):
@@ -850,13 +856,13 @@ class battle:
 
             if self.attackers_health <= 0:
                 player_stats[self.type_exp] += self.exp
-                print("You won the fight!")
+                print("\n\nYou won the fight!\n")
                 if self.reward_item and reward_yes:
                     inventory.append(self.reward_item)
                     print(f'You are awarded with a {self.reward_item}!')
                 if self.reward_gold and reward_yes:
                     coin += self.reward_gold
-                    print(f"You are awarded with {self.reward_gold} coins!")
+                    print(f"You are awarded with {self.reward_gold} coins!\n")
                 break
 
             if player_health <= round(int(health_point)):
@@ -892,6 +898,61 @@ class battle:
             pass
         if player_health <= 0:
             death()
+
+class dungeon:
+    def __init__(self, name_of_dungeon: str = "Dungeon", end_goal: str = 'escape'):
+        self.dungeon_name: str = name_of_dungeon
+        self.end_goal: str = end_goal
+    
+    def generate_dungeon(self, room_amount: int = 3, total_enemies: int = 0):
+        if total_enemies == 0:
+            enemy_distribution = [0] * room_amount
+        else:
+            enemy_distribution = [1 if i < total_enemies else 0 for i in range(room_amount)]
+            random.shuffle(enemy_distribution)
+        
+        for enemy_count in enemy_distribution:
+            self.room(enemy_amount = enemy_count)
+        self.end_room()
+        
+    def room(self, enemy_amount: int = 0):
+        print('You enter a room in the dungeon.')
+        time.sleep(2)
+        
+        if enemy_amount > 0:
+            coins = random.randint(1, 15)
+            print('But get ready! There\'s some monsters prepared to attack!')
+            time.sleep(1)
+            battle('Dungeon Monster', 10, 3, 'strength', coins, attackers_armor = 'naturalarmor').fight()
+        else:
+            print('Luckly, the room remains empty.')
+    
+    def end_room(self):
+        global coin, inventory
+        
+        if self.end_goal == 'escape':
+            print('You come to room with bright lights showing through a door.')
+            time.sleep(2)
+            print('An escape. Finally. You exit the dungeon.')
+            time.sleep(1)
+        elif self.end_goal == 'chest':
+            coin_gain = random.randint(25, 200)
+            coin += coin_gain
+            print('You finally come to the last room, there remains a chest and a door to outside.')
+            time.sleep(2)
+            print('You open the chest, it had quite the loot.')
+            time.sleep(1)
+        elif self.end_goal == 'boss':
+            boss = f'{colors.ITALIC}{colors.RED}Dungeon Boss{colors.ENDC}'
+            print('You enter a large room.')
+            time.sleep(1)
+            print(f'{colors.ITALIC}Oddly fitting for a boss battle. WAI--{colors.ENDC}')
+            time.sleep(2)
+            print('A big stomp shakes the room. You, in terror, look up.')
+            time.sleep(1)
+            print(f'{boss}: GROVEL AT MY FEET PEASANT.')
+            time.sleep(2)
+            battle("Dungeon Boss", 50, 7, "strength", 50, attackers_armor = 'naturalarmor')
 
 def random_event_picker():
     global inventory, player_weapon, player_health
@@ -966,7 +1027,8 @@ def random_event_picker():
             except ValueError:
                 print("Invalid input. Please enter a number.")
         elif not X:
-            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern_event, kidnappers, tavern_challenge, skeleton_attack, tavern_rats]
+            # 
+            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern_event, kidnappers, tavern_challenge, skeleton_attack, tavern_rats, dungeon_event]
             random.choice(events)()
         else:
             pass
@@ -1435,5 +1497,45 @@ def tavern_rats():
         time.sleep(2)
         tavern().bartender()
         random_event_picker()
+
+def dungeon_event():
+    global coin
+    enemies = random.randint(1, 3)
+    rooms = random.randint(1, 6)
+    endings = ['boss', 'escape', 'chest']
+    ending = random.choice(endings)
+    
+    print('While walking on a deserted path, the ground underneath you starts to fall.')
+    time.sleep(2)
+    if calculate_chance(.05, player_stats['dexterity']):
+        print('You manage to jump out of the way just before it collapses.')
+        time.sleep(1)
+        print(f'{name}: Crap... That was close.')
+        time.sleep(1)
+        print('You look down the hole created, the ground isn\'t to far down. It looks like a dungeon down there.')
+        time.sleep(3)
+        print(f'{name}: I wonder what\'s down there...')
+        time.sleep(1)
+        T = input(f'{colors.ITALIC}Jump down?{colors.ENDC} (Y/N?)')
+        
+        if T.lower() == 'y':
+            print(f'{name}: Well, why not.')
+            time.sleep(1)
+            print(f'{colors.ITALIC}You fall down the hole...{colors.ENDC}')
+            time.sleep(2)
+            print('You fall down, luckly it wasn\'t that far down.')
+            time.sleep(1)
+        else:
+            print(f'{name}: Best to not go into random holes.')
+            time.sleep(1)
+            random_event_picker()
+    else:
+        print('You fall down the hole, and land on the ground.')
+        time.sleep(1)
+    
+    print('You look around, thankfully there isn\'t any creature.')
+    time.sleep(1)
+    dungeon('Dungeon', ending).generate_dungeon(rooms, enemies)
+    random_event_picker()
 
 start()

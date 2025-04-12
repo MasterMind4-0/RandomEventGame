@@ -15,9 +15,13 @@ def generate_healing(x: int, y: int):
     return healing
 
 def calculate_chance(chance: float, modifier = None):
+    global player_stats
     random_value = random.random()
     if modifier:
         win_chance = chance - (player_stats[modifier] / 10)
+        player_stats[modifier] += random.randint(0, 0.1)
+        if dev_mode_enabled:
+            print(f"{colors.DEV}Modified chance: {win_chance}\nCompared value: {random_value}\nNew {modifier} value: {player_stats[modifier]}{colors.ENDC}")
     else:
         win_chance = chance
     if random_value < win_chance:
@@ -31,7 +35,7 @@ try:
 except FileNotFoundError or json.JSONDecodeError as e:
     error_found('There was an error loading the items database.', e)
 
-player_stats = {'strength': 0.0, 'constitution': 0.0, 'dexterity': 0.0}
+player_stats = {'strength': 0.0, 'constitution': 0.0, 'dexterity': 0.0, 'charisma': 0.0}
 name = 'DEV'
 player_health = 20
 dev_mode_enabled = False
@@ -900,10 +904,36 @@ class battle:
             death()
 
 class dungeon:
-    def __init__(self, name_of_dungeon: str = "Dungeon", end_goal: str = 'escape'):
+    def __init__(self, name_of_dungeon: str = "dungeon", end_goal: str = 'escape'):
         self.dungeon_name: str = name_of_dungeon
         self.end_goal: str = end_goal
     
+    def generate_special_dungeon(self, room_amount: int = 3, total_enemies: int = 0, enemy_name: str = 'Dungeon Monster', enemy_health: int = 10, enemy_damage: int = 3, type_exp_dungeon: str = 'strength', reward_gold_dungeon: int = random.randint(1, 15), reward_item_dungeon: str = None, enemy_armor = 'naturalarmor', basin_affect: bool = True, gold_room: bool = True, puzzle_room: bool = True):
+        if total_enemies == 0:
+            enemy_distribution = [0] * room_amount
+        else:
+            enemy_distribution = [1 if i < total_enemies else 0 for i in range(room_amount)]
+            random.shuffle(enemy_distribution)
+        
+        for enemy_count in enemy_distribution:
+            if calculate_chance(.35) and puzzle_room:
+                self.puzzle_room(difficulty = random.randint(1, 4))
+            elif calculate_chance(.15) and basin_affect:
+                self.basin_affect_room()
+            elif calculate_chance(.05) and gold_room:
+                self.gold_loot_room()
+            else:
+                print(f'You enter a room in the {self.dungeon_name}.')
+            time.sleep(2)
+            
+            if enemy_count > 0:
+                print('But get ready! There\'s some monsters prepared to attack!')
+                time.sleep(1)
+                battle(enemy_name, enemy_health, enemy_damage, type_exp_dungeon, reward_gold_dungeon, reward_item_dungeon, enemy_armor).fight()
+            else:
+                print('Luckly, the room remains empty.')
+        self.end_room()
+
     def generate_dungeon(self, room_amount: int = 3, total_enemies: int = 0):
         if total_enemies == 0:
             enemy_distribution = [0] * room_amount
@@ -912,21 +942,157 @@ class dungeon:
             random.shuffle(enemy_distribution)
         
         for enemy_count in enemy_distribution:
-            self.room(enemy_amount = enemy_count)
+            if calculate_chance(.35):
+                self.puzzle_room(difficulty = random.randint(1, 4))
+            elif calculate_chance(.15):
+                self.basin_affect_room()
+            elif calculate_chance(.05):
+                self.gold_loot_room()
+            else:
+                self.room(enemy_amount = enemy_count)
         self.end_room()
         
     def room(self, enemy_amount: int = 0):
-        print('You enter a room in the dungeon.')
+        print(f'You enter a room in the {self.dungeon_name}.')
         time.sleep(2)
         
         if enemy_amount > 0:
-            coins = random.randint(1, 15)
             print('But get ready! There\'s some monsters prepared to attack!')
             time.sleep(1)
-            battle('Dungeon Monster', 10, 3, 'strength', coins, attackers_armor = 'naturalarmor').fight()
+            battle('Dungeon Monster', 10, 3, 'strength', random.randint(1, 15), attackers_armor = 'naturalarmor').fight()
         else:
             print('Luckly, the room remains empty.')
-    
+
+    def puzzle_room(self, difficulty: int = 1):
+        directions = ['left', 'right', 'straight']
+        print('You enter a room with a strange puzzle.')
+        time.sleep(2)
+        if difficulty == 1:
+            sequence = [random.choice(directions) for _ in range(5)]
+            reveal_time = 5
+        elif difficulty == 2:
+            sequence = [random.choice(directions) for _ in range(7)]
+            reveal_time = 7
+        elif difficulty == 3:
+            sequence = [random.choice(directions) for _ in range(10)]
+            reveal_time = 10
+        elif difficulty == 4:
+            sequence = [random.choice(directions) for _ in range(15)]
+            reveal_time = 15
+        sequence_str = ', '.join(sequence)
+
+        print('A maze, by the looks of it.')
+        time.sleep(1)
+        print('Luckily, instructions are written on the wall.')
+        time.sleep(1)
+        print(f'\n{sequence_str}.\n')
+        time.sleep(reveal_time)
+        print("\033c", end="")
+        print(f'{colors.ITALIC}Here is hoping I remember.{colors.ENDC}')
+        wait()
+
+        while True:
+            for direction in sequence:
+                T = input('Which way? (L, R, S?)').strip().lower()
+
+                if T == 'l':
+                    player_choice = 'left'
+                elif T == 'r':
+                    player_choice = 'right'
+                elif T == 's':
+                    player_choice = 'straight'
+                else:
+                    print('Invalid input. Restart.')
+                    break
+
+                if player_choice != direction:
+                    if calculate_chance(.25):
+                        print('As you walk down the path, a oozing slime crawls down from the ceiling.')
+                        time.sleep(1)
+                        battle('Slime', 20, 2, 'strength', 0, attackers_armor = 'noarmor').fight()
+                        time.sleep(1)
+                        print('After you finished the slime, you continue down the path.')
+                        time.sleep(1)
+
+                    print('As you walk down the path, you realize you are back from where you started.')
+                    time.sleep(1)
+                    print('Luckly, this allows you to see the instructions again.')
+                    time.sleep(1)
+                    print(f'\n{sequence_str}.\n')
+                    time.sleep(reveal_time // 2)
+                    print("\033c", end="")
+                    break
+            else:
+                print('You successfully navigated the maze!')
+                break
+
+    def basin_affect_room(self):
+        global player_health, player_stats
+
+        print('You enter a room with an interesting-looking basin embedded in the walls.')
+        time.sleep(2)
+        print('The basin is filled with a glowing liquid that is seeping through the walls.')
+        time.sleep(2)
+        uinput = input(f'{colors.ITALIC}Should I drink from the basin?{colors.ENDC} (Y/N)\n').strip().lower()
+        if uinput == 'y':
+            print(f'{colors.ITALIC}Why the heck not?{colors.ENDC}')
+            time.sleep(1)
+            print('You sip from the basin, it\'s flavor mossy yet crisp and sweet.')
+            time.sleep(2)
+            if calculate_chance(.95):
+                print('You feel suddenly renewed and refreshed!')
+                player_health += generate_healing(5, 15)
+                healthcap()
+                print(f'Your health is now {player_health}.')
+            else:
+                exp_type = random.choice(['strength', 'dexterity', 'constitution'])
+                exp_gain = random.randint(0.5, 1)
+                player_stats[exp_type] += exp_gain
+                if exp_type == 'strength':
+                    print('Your muscles suddenly feel rejuvenated.')
+                    if dev_mode_enabled:
+                        print(f'{colors.DEV}Strength increased by {exp_gain}{colors.ENDC}')
+                elif exp_type == 'dexterity':
+                    print('You feel a surge of energy coursing through your body.')
+                    if dev_mode_enabled:
+                        print(f'{colors.DEV}Dexterity increased by {exp_gain}{colors.ENDC}')
+                elif exp_type == 'constitution':
+                    print('You feel a newfound resilience within you.')
+                    if dev_mode_enabled:
+                        print(f'{colors.DEV}Constitution increased by {exp_gain}{colors.ENDC}')
+        else:
+            print(f'{name}: I don\'t drink from random sources.')
+        time.sleep(2)
+
+    def gold_loot_room(self):
+        global coin
+
+        coin_gain = random.randint(50, 500)
+        coin += coin_gain
+        print('You enter a room with a pile of gold coins, they are everywhere. Top to bottom.')
+        time.sleep(2)
+        print(f'You quickly gather {coin_gain} coins from the pile.')
+        time.sleep(1)
+        if calculate_chance(.35):
+            print('You hear a rumbling sound, and suddenly the piles of gold start to shrink!')
+            time.sleep(2)
+            print('They are being siphoned down into whatever lies below!')
+            time.sleep(1)
+            if calculate_chance(.15, 'dexterity'):
+                print('You try to dash to escape the draining coins, but it\'s too late.')
+                time.sleep(1)
+                print('You get sucked down into the abyss below.')
+                time.sleep(3)
+                print('Once you wake up on the cold stone floor.')
+                time.sleep(1)
+                print('You look around, and make out a large beast in the background.')
+                battle('Gold Keeper', 30, 5, 'strength', coin_gain, attackers_armor = .25).fight()
+                print('You managed to kill the Keeper and take its gold. And, luckly, there is an exit right in front of you.')
+                random_event_picker()
+            else:
+                print('You manage to escape the draining coins, and find a way out of the room.')
+                time.sleep(1)
+
     def end_room(self):
         global coin, inventory
         
@@ -946,17 +1112,19 @@ class dungeon:
             boss = f'{colors.ITALIC}{colors.RED}Dungeon Boss{colors.ENDC}'
             print('You enter a large room.')
             time.sleep(1)
-            print(f'{colors.ITALIC}Oddly fitting for a boss battle. WAI--{colors.ENDC}')
+            print(f'{colors.ITALIC}Oddly fitting for a boss battle. WAIT--{colors.ENDC}')
             time.sleep(2)
             print('A big stomp shakes the room. You, in terror, look up.')
             time.sleep(1)
             print(f'{boss}: GROVEL AT MY FEET PEASANT.')
             time.sleep(2)
-            battle("Dungeon Boss", 50, 7, "strength", 50, attackers_armor = 'naturalarmor')
+            battle("Dungeon Boss", 50, 7, "strength", 50, 'dungeonslayer',  attackers_armor = 'naturalarmor').fight()
+        
 
 def random_event_picker():
     global inventory, player_weapon, player_health
     wait()
+    print("\033c", end="")
     while True:
         healthcap()
         X = input(f'''
@@ -1028,7 +1196,7 @@ def random_event_picker():
                 print("Invalid input. Please enter a number.")
         elif not X:
             # 
-            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern_event, kidnappers, tavern_challenge, skeleton_attack, tavern_rats, dungeon_event]
+            events = [town, farmer_problem, lost_traveler, travling_merchant, tavern_event, kidnappers, tavern_challenge, skeleton_attack, tavern_rats, dungeon_hole_event, adventurers_quest]
             random.choice(events)()
         else:
             pass
@@ -1498,7 +1666,7 @@ def tavern_rats():
         tavern().bartender()
         random_event_picker()
 
-def dungeon_event():
+def dungeon_hole_event():
     global coin
     enemies = random.randint(1, 3)
     rooms = random.randint(1, 6)
@@ -1516,7 +1684,7 @@ def dungeon_event():
         time.sleep(3)
         print(f'{name}: I wonder what\'s down there...')
         time.sleep(1)
-        T = input(f'{colors.ITALIC}Jump down?{colors.ENDC} (Y/N?)')
+        T = input(f'{colors.ITALIC}Jump down?{colors.ENDC} (Y/N)')
         
         if T.lower() == 'y':
             print(f'{name}: Well, why not.')
@@ -1537,5 +1705,97 @@ def dungeon_event():
     time.sleep(1)
     dungeon('Dungeon', ending).generate_dungeon(rooms, enemies)
     random_event_picker()
+
+def adventurers_quest():
+    global coin
+    adv = '\033[3mAdventurer\033[0m'
+
+    print('In a small tavern, you overheared a group of adventurers talking of a dangerious crypt looting thet they are planning.')
+    time.sleep(3)
+    print(f'{adv}: I\'m telling you, there is a crypt not far from here, and it is said to be filled with treasure!')
+    time.sleep(2)
+    print(f'{adv}: We\'ll all split it evenly!')
+    time.sleep(1)
+    question = input(f'{colors.ITALIC}Should I talk to them? Or maybe find out if I can find the crypt myself? (Talk or find)\n{colors.ENDC}').strip().lower()
+
+    if question == 'talk':
+        print(f'{name}: I hear you know of a crypt, and I want in.')
+        time.sleep(1)
+        print(f'{adv}: And you is this asking?')
+        time.sleep(1)
+        print(f'{name}: I\'m {name}, quite the adventurer myself.')
+        time.sleep(1)
+        print('The adventurer scoffs.')
+        time.sleep(1)
+        print(f'{adv}: Anyone would say anything to get with the riches.')
+        time.sleep(1)
+        print(f'{adv}: I\'ll need some proof.')
+        time.sleep(1)
+        print(f'{name}: Proof? What do you want?')
+        time.sleep(1)
+        print(f'{adv}: Fight me, if you can beat me, you can join us.')
+        time.sleep(1)
+        print(f'{adv}: Simple as that.')
+        time.sleep(1)
+        fightq = input(f'{colors.ITALIC}Should I fight him? (Y/N)\n{colors.ENDC}').strip().lower()
+        if fightq == 'y':
+            battle('Adventurer', 20, 5, 'strength', attackers_armor='leatherarmor').fight()
+            print('You knock the adventurer to the ground.')
+            time.sleep(1)
+            print(f'{adv}: OK! OK! Don\'t kill me!')
+            time.sleep(1)
+            print(f'{adv}: You\'re not half bad. Alright, you can join us.')
+            time.sleep(2)
+            print(f'{adv}: You get 25% of the gold, got it?')
+            time.sleep(1)
+            no_i_dont = input(f'{colors.ITALIC}I bet I could get lower... (Y/N)\n{colors.ENDC}').strip().lower()
+            lowered = calculate_chance(.45, player_stats['charisma'])
+
+            if no_i_dont == 'y' and lowered:
+                print(f'{name}: I reckon I deserve more than that.')
+                time.sleep(1)
+                print(f'{adv}: You\'re a tough one, I like that.')
+                time.sleep(1)
+                print(f'{adv}: Alright, 30% of the gold, but that\'s it!')
+                time.sleep(1)
+                print('You nod in agreement.')
+                time.sleep(1)
+                crypt(True)
+            elif no_i_dont == 'y' and not lowered:
+                print(f'{name}: I reckon I deserve more than that.')
+                time.sleep(1)
+                print(f'{adv}: You\'re a tough one, I like that.')
+                time.sleep(1)
+                print(f'{adv}: But you\'re still getting 25%!')
+                time.sleep(1)
+                print('The group snickers as you roll your eyes.')
+                crypt(True)
+            else:
+                print(f'{name}: Fine, 25% is good enough for me.')
+                time.sleep(1)
+                crypt(True)
+        else:
+            print(f'{name}: I think I\'ll pass.')
+            time.sleep(1)
+            print('The adventurer looks at you with a smirk.')
+            time.sleep(1)
+            print(f'{adv}: Coward.')
+            random_event_picker()
+    else:
+        print(f'{name}: The money would be much better spent in my hands.')
+        time.sleep(2)
+        print('You decide to stay, and see if they mention any location.')
+        time.sleep(1)
+        print('Furtunately, they do.')
+        crypt()
+
+def crypt(from_quest: bool = False):
+    global coin, inventory
+    adv = '\033[3mAdventurer\033[0m'
+
+    if from_quest:
+        print('You and the adventurers walk to the crypt.')
+        time.sleep(2)
+        print()
 
 start()

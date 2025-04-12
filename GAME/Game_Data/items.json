@@ -6,16 +6,14 @@
             "Armor": 0,
             "price": 0,
             "sellable": false,
-            "InShop": false,
-            "Craftable": false
+            "InShop": false
         },
         "naturalarmor": {
             "name": "naturalarmor",
             "dname": "Natural Armor",
             "Armor": 0.1,
             "sellable": false,
-            "InShop": false,
-            "Craftable": false
+            "InShop": false
         },
         "ironarmor": {
             "name": "ironarmor",
@@ -23,12 +21,15 @@
             "Armor": 0.35,
             "price": 30,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "iron": 5,
-                "leather": 2
-            }
+            "InShop": true
+        },
+        "platearmor": {
+            "name": "platearmor",
+            "dname": "Plate Armor",
+            "Armor": 0.5,
+            "price": 100,
+            "sellable": true,
+            "InShop": true
         },
         "leatherarmor": {
             "name": "leatherarmor",
@@ -36,12 +37,7 @@
             "Armor": 0.25,
             "price": 15,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "iron": 1,
-                "leather": 5
-            }
+            "InShop": true
         },
         "hood": {
             "name": "hood",
@@ -49,11 +45,7 @@
             "Armor": 0.07,
             "price": 10,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "burlap": 6
-            }
+            "InShop": true
         }
     },
     "weapons": {
@@ -63,13 +55,7 @@
             "Damage": 2,
             "price": 15,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "iron": 5,
-                "leather": 1,
-                "stick": 1
-            }
+            "InShop": true
         },
         "ironlongsword": {
             "name": "ironlongsword",
@@ -77,13 +63,15 @@
             "Damage": 5,
             "price": 30,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "iron": 7,
-                "leather": 2,
-                "stick": 1
-            }
+            "InShop": true
+        },
+        "dungeonslayer": {
+            "name": "dungeonslayer",
+            "dname": "Dungeon Slayer",
+            "Damage": 7,
+            "price": 100,
+            "sellable": true,
+            "InShop": false
         },
         "crossbow": {
             "name": "crossbow",
@@ -91,13 +79,7 @@
             "Damage": 3,
             "price": 15,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "iron": 1,
-                "stick": 4,
-                "string": 3
-            }
+            "InShop": true
         },
         "dagger": {
             "name": "dagger",
@@ -105,13 +87,7 @@
             "Damage": 1,
             "price": 8,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "iron": 3,
-                "leather": 1,
-                "stick": 1
-            }
+            "InShop": true
         },
         "bonedagger": {
             "name": "bonedagger",
@@ -119,11 +95,7 @@
             "Damage": 1.5,
             "price": 12,
             "sellable": true,
-            "InShop": false,
-            "Craftable": true,
-            "CraftRecipe": {
-                "largebone": 1
-            }
+            "InShop": false
         }
     },
     "items": {
@@ -134,12 +106,7 @@
             "max": 5,
             "price": 5,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "redmushroom": 2,
-                "glassbottle": 1
-            }
+            "InShop": true
         },
         "greaterhealthpotion": {
             "name": "greaterhealthpotion",
@@ -148,12 +115,7 @@
             "man": 10,
             "price": 15,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "redmushroom": 4,
-                "glassbottle": 1
-            }
+            "InShop": true
         },
         "greatesthealthpotion": {
             "name": "greatesthealthpotion",
@@ -162,13 +124,7 @@
             "max": 20,
             "price": 25,
             "sellable": true,
-            "InShop": true,
-            "Craftable": true,
-            "CraftRecipe": {
-                "redmushroom": 8,
-                "ruby": 1,
-                "glassbottle": 1
-            }
+            "InShop": true
         }
     },
     "drinks": {
@@ -181,8 +137,7 @@
                 "exp": 0.02,
                 "price": 6,
                 "sellable": false,
-                "InShop": false,
-                "Craftable": false
+                "InShop": false
             },
             "goblinvomit": {
                 "name": "goblinvomit",
@@ -192,8 +147,7 @@
                 "exp": 0.03,
                 "price": 5,
                 "sellable": false,
-                "InShop": false,
-                "Craftable": false
+                "InShop": false
             }
         },
         "rum": {
@@ -202,8 +156,7 @@
             "drunk_effective": 0.7,
             "price": 2,
             "sellable": false,
-            "InShop": false,
-            "Craftable": false
+            "InShop": false
         },
         "wine": {
             "name": "wine",
@@ -211,8 +164,7 @@
             "drunk_effective": 0.25,
             "price": 3,
             "sellable": false,
-            "InShop": false,
-            "Craftable": false
+            "InShop": false
         },
         "beer": {
             "name": "beer",
@@ -220,98 +172,7 @@
             "drunk_effective": 0.6,
             "price": 2,
             "sellable": false,
-            "InShop": false,
-            "Craftable": false
-        }
-    },
-    "itemss": {
-        "redmushroom": {
-            "name": "redmushroom",
-            "dname": "Red Mushroom",
-            "price": 1,
-            "sellable": true,
-            "InShop": true,
-            "Craftable": false
-        },
-        "glassbottle": {
-            "name": "glassbottle",
-            "dname": "Glass Bottle",
-            "price": 1,
-            "sellable": true,
-            "InShop": true,
-            "Craftable": false
-        },
-        "iron": {
-            "name": "iron",
-            "dname": "Iron",
-            "price": 2,
-            "sellable": true,
-            "InShop": true,
-            "Craftable": false
-        },
-        "leather": {
-            "name": "leather",
-            "dname": "Leather",
-            "price": 1,
-            "sellable": true,
-            "InShop": true,
-            "Craftable": false
-        },
-        "stick": {
-            "name": "stick",
-            "dname": "Stick",
-            "price": 1,
-            "sellable": true,
-            "InShop": true,
-            "Craftable": false
-        },
-        "burlap": {
-            "name": "burlap",
-            "dname": "Burlap",
-            "price": 1,
-            "sellable": true,
-            "InShop": true,
-            "Craftable": false
-        },
-        "string": {
-            "name": "string",
-            "dname": "String",
-            "price": 1,
-            "sellable": true,
-            "InShop": true,
-            "Craftable": false
-        },
-        "largebone": {
-            "name": "largebone",
-            "dname": "Large Bone",
-            "price": 1,
-            "sellable": true,
-            "InShop": false,
-            "Craftable": false
-        },
-        "ruby": {
-            "name": "ruby",
-            "dname": "Ruby",
-            "price": 20,
-            "sellable": true,
-            "InShop": false,
-            "Craftable": false
-        },
-        "sapphire": {
-            "name": "sapphire",
-            "dname": "Sapphire",
-            "price": 10,
-            "sellable": true,
-            "InShop": false,
-            "Craftable": false
-        },
-        "emerald": {
-            "name": "emerald",
-            "dname": "Emerald",
-            "price": 10,
-            "sellable": true,
-            "InShop": false,
-            "Craftable": false
+            "InShop": false
         }
     }
 }
